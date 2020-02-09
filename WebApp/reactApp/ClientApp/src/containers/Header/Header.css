@@ -1,0 +1,37 @@
+﻿ .Header {
+    width: 100%;
+    color: whitesmoke;
+    background-color: #148f77;
+    border-radius: 0 0 5% 5%;
+    box-shadow: 0 0 10px 0 rgba(23,32,42,1),5px 5px 5px 5px rgba(23,32,42,.1) inset;
+    height: 50px;
+    font-size: 20px;
+    font-family: Montserrat;
+    color: #daf7a6;
+}
+.Header li {
+    display: inline-block;
+    text-decoration: none;
+    list-style-type: none;
+    margin: 0 5% 0 5%;
+    height:100%;
+    padding-top:10px;
+}
+
+.Header ul{
+    text-align:center;
+    height:100%;
+    margin:0;
+    padding:0;
+    min-width:315px;
+}
+
+.Header a {
+    height:100%;
+    color:whitesmoke;
+}
+.Header a:hover {
+    /*color:#9003cf;*/
+    color: lightpink;
+    text-decoration: none;
+}

@@ -1,0 +1,19 @@
+﻿.myGrid{
+    background-color:cornsilk;
+    height:100%;
+    width:100%;
+    margin:0;
+    padding:0;
+    display:grid;
+    text-align:center;
+    grid-template-columns: repeat(2,1fr);
+    grid-template-rows:repeat(2,1fr);
+}
+@media only screen and (max-width:600px){
+
+    .myGrid{
+        display:block;
+        overflow:scroll;
+    }
+
+}

@@ -1,0 +1,8 @@
+C:\Users\User\source\repos\ZavrsniRad\CORE\bin\Debug\netcoreapp3.0\CORE.deps.json
+C:\Users\User\source\repos\ZavrsniRad\CORE\bin\Debug\netcoreapp3.0\CORE.dll
+C:\Users\User\source\repos\ZavrsniRad\CORE\obj\Debug\netcoreapp3.0\CORE.csprojAssemblyReference.cache
+C:\Users\User\source\repos\ZavrsniRad\CORE\obj\Debug\netcoreapp3.0\CORE.AssemblyInfoInputs.cache
+C:\Users\User\source\repos\ZavrsniRad\CORE\obj\Debug\netcoreapp3.0\CORE.AssemblyInfo.cs
+C:\Users\User\source\repos\ZavrsniRad\CORE\bin\Debug\netcoreapp3.0\CORE.pdb
+C:\Users\User\source\repos\ZavrsniRad\CORE\obj\Debug\netcoreapp3.0\CORE.dll
+C:\Users\User\source\repos\ZavrsniRad\CORE\obj\Debug\netcoreapp3.0\CORE.pdb
