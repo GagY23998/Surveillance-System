@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Serilog;
 using AppCore.Requests;
+using System.Threading;
 
 namespace Desktop
 {
@@ -25,111 +26,99 @@ namespace Desktop
         private SerialPort serial;
         private FaceRecognitionDB faceRecognition;
         private CascadeClassifier classifier = new CascadeClassifier(@"../../Assets/haarcascade_frontalface_default.xml");
-        VideoCapture camEnter;
-        VideoCapture camExit;
+        //public static VideoCapture camEnter;
+        //public static VideoCapture camExit;
+        //public static bool Entered = false;
+        //public static bool Left = false;
+
         public MainForm()
         {
             InitializeComponent();
-            deletedButtons = new List<Button>();
-            faceRecognition = new FaceRecognitionDB();
-            camEnter = new VideoCapture(1);
-            camExit = new VideoCapture(2);
-            camEnter.ImageGrabbed += CamEnter_ImageGrabbed;
-            camExit.ImageGrabbed += CamExit_ImageGrabbed;
+            //serial = new SerialPort("COM3", 9600);
+            //serial.DtrEnable = true;
+            //serial.RtsEnable = true;
+            //deletedButtons = new List<Button>();
+            //faceRecognition = new FaceRecognitionDB();
+            //camEnter = new VideoCapture(1);
+            //camExit = new VideoCapture(2);
+            //camEnter.ImageGrabbed += CamEnter_ImageGrabbed;
+            //camExit.ImageGrabbed += CamExit_ImageGrabbed;
+            //serial.Open();
         }
 
-        private async void CamExit_ImageGrabbed(object sender, EventArgs e)
-        {
-            try
-            {
-                Mat m = new Mat();
-                camEnter.Retrieve(m);
-                Rectangle[] rectangles = classifier.DetectMultiScale(m, 1.1, 3);
-                if (rectangles.Count() > 0)
-                {
-                    Image<Gray, byte> image = m.ToImage<Gray, byte>().Resize(240, 180, Emgu.CV.CvEnum.Inter.Cubic);
-                    await faceRecognition.Predict(image,StateType.Left);
-                }
-            }
-            catch (Exception err)
-            {
-                //do nothin
+        //private async void CamExit_ImageGrabbed(object sender, EventArgs e)
+        //{
+        //    try
+        //    {
+        //        if (!Left)
+        //        {
+        //            Left = true;
+        //            Mat m =camExit.QueryFrame();
+        //            Image<Gray, byte> grayImage = m.ToImage<Gray, byte>();
+        //            grayImage._EqualizeHist();
+                    
+        //            Rectangle[] rectangles = classifier.DetectMultiScale(grayImage,1.3,5);
 
-            }
+        //            if (rectangles.Count() > 0)
+        //            {
+        //                Image<Gray, byte> image = m.ToImage<Gray,byte>().Copy(rectangles[0]).Resize(100, 100, Emgu.CV.CvEnum.Inter.Cubic);
+        //                image._EqualizeHist();
+        //                var result =await faceRecognition.Predict(image,StateType.Left);
+        //                if (result != null && serial.IsOpen)
+        //                {
+        //                    byte myByte = Convert.ToByte('O');
+        //                    serial.Write(new byte[] { myByte }, 0, 1);
+        //                }
+        //            }
+        //            Left = false;
+        //        }
+        //    }
+        //    catch (Exception err)
+        //    {
+        //        //do nothin
 
-        }
+        //    }
 
-        private async void CamEnter_ImageGrabbed(object sender, EventArgs e)
-        {
-            try
-            {
-                Mat m = new Mat();
-                camEnter.Retrieve(m);
-                Rectangle[] rectangles = classifier.DetectMultiScale(m, 1.1, 3);
-                if (rectangles.Count() > 0)
-                {
-                    Image<Gray, byte> image = m.ToImage<Gray, byte>().Resize(240, 180, Emgu.CV.CvEnum.Inter.Cubic);
-                    await faceRecognition.Predict(image,StateType.Entered); 
-                }
-            }
-            catch (Exception err)
-            {
-                //do nothin
+        //}
+
+        //private async void CamEnter_ImageGrabbed(object sender, EventArgs e)
+        //{
+        //    try
+        //    {
+        //        if (!Entered)
+        //        {
+        //            Entered = true;
+        //            Mat m = camEnter.QueryFrame();
+        //            Image<Gray, byte> grayImage = m.ToImage<Gray, byte>();
+        //            grayImage._EqualizeHist();
+        //            Rectangle[] rectangles = classifier.DetectMultiScale(grayImage,1.3,5);
+        //            if (rectangles.Count() > 0)
+        //            {
+        //                Image<Gray, byte> image = m.ToImage<Gray,byte>().Copy(rectangles[0]).Resize(100, 100, Emgu.CV.CvEnum.Inter.Cubic);
+        //                image._EqualizeHist();
+        //                var res = await faceRecognition.Predict(image,StateType.Entered);
+        //                if (res != null && serial.IsOpen)
+        //                {
+        //                    byte myByte = Convert.ToByte('O');
+        //                    serial.Write(new byte[] { myByte }, 0, 1);
+        //                }
+        //            }
+        //            Entered = false;
+        //        }
+        //    }
+        //    catch (Exception err)
+        //    {
+        //        //do nothin
                 
-            }
+        //    }
           
-        }
+        //}
 
       
 
         private void btn_Users_Click(object sender, EventArgs e)
         {
-            var buttons = sidePanel.Controls.OfType<Button>().Where(_ => _.Text != "Exit" && _.Text !="Menu");
-            foreach (var control in buttons)
-            {
-                deletedButtons.Add(control);
-                sidePanel.Controls.Remove(control);
-            }
-            //List<Button> newButtons = new List<Button>
-            //{
-            //    new Button{Name ="btnAddUser",Text="Add User"},
-            //    new Button{Name ="btnUpdateUser",Text="Update User"},
-            //    new Button{Name ="btnRemoveUser",Text="Remove User"}
-            //};
-
-            //for(int i =0;i<newButtons.Count;i++)
-            //{
-            //    if (i == 0)
-            //    {
-            //        newButtons[i].Location = new Point(0,sidePanel.Controls[1].Location.Y+53);
-            //    }
-            //    else{
-            //        newButtons[i].Location = new Point(0, newButtons[i - 1].Location.Y+53);
-            //    }
-            //    newButtons[i].Size = new Size(182, 59);
-            //    newButtons[i].BackColor = Color.FromArgb(79, 83, 83);
-            //    newButtons[i].Font = new Font("Raleway Medium", 18.25f);
-            //    newButtons[i].ForeColor = Color.WhiteSmoke;
-            //    sidePanel.Controls.Add(newButtons[i]);
-            //}
-            var backButton = new Button
-            {
-                Name = "btnBack",
-                Text = "Back",
-                Size = new Size(182, 59),
-                BackColor = Color.FromArgb(79, 83, 83),
-                Font = new Font("Raleway Medium", 18.25f),
-                ForeColor = Color.WhiteSmoke
-            };
-
-            //  backButton.Location = new Point(0, newButtons[newButtons.Count - 1].Location.Y + 53);
-            backButton.Location = new Point(0, sidePanel.Controls[sidePanel.Controls.Count - 1].Location.Y + 53);
-            btnExit.Location = new Point(0, backButton.Location.Y + 53);
-            
-            sidePanel.Controls.Add(backButton);
-        
-            backButton.Click += BackButton_Click;
-
+          
             frmUsersMenu frm = new frmUsersMenu()
             {
                 AutoScroll = false,
@@ -142,35 +131,7 @@ namespace Desktop
             frm.Show();
         }
 
-        private void BackButton_Click(object sender, EventArgs e)
-        {
-            var buttons = sidePanel.Controls.OfType<Button>().ToList();
-
-            foreach (var item in buttons)
-            {
-                if (item.Text == "Exit" || item.Text == "Menu")
-                    continue;
-                sidePanel.Controls.Remove(item);
-            }
-            int cnt = sidePanel.Controls.Count;
-            sidePanel.Controls.AddRange(deletedButtons.ToArray());
-
-            for (int i = cnt; i < sidePanel.Controls.Count; i++)
-            {
-                if(i == cnt)
-                {
-                    sidePanel.Controls[i].Location = new Point(0,sidePanel.Controls[1].Location.Y+53);
-                }
-                else
-                {
-                    sidePanel.Controls[i].Location = new Point(0, sidePanel.Controls[i - 1].Location.Y + 53);
-                }
-
-            }
-            btnExit.Location = new Point(0, sidePanel.Controls[sidePanel.Controls.Count - 1].Location.Y + 53);
-            mainPanel.Controls.Clear();
-        }
-
+      
         private void btnExit_Click(object sender, EventArgs e)
         {
             this.Close();
@@ -179,51 +140,6 @@ namespace Desktop
 
         private void btn_Logs_Click(object sender, EventArgs e)
         {
-            var buttons = sidePanel.Controls.OfType<Button>().Where(_ => _.Text != "Exit" && _.Text != "Menu");
-            foreach (var control in buttons)
-            {
-                deletedButtons.Add(control);
-                sidePanel.Controls.Remove(control);
-            }
-            List<Button> newButtons = new List<Button>
-            {
-                new Button{Name ="btnAddLogs",Text="Add Log"},
-                new Button{Name ="btnUpdateLogs",Text="Update Log"},
-                new Button{Name ="btnRemoveLogs",Text="Remove Log"}
-            };
-
-            for (int i = 0; i < newButtons.Count; i++)
-            {
-                if (i == 0)
-                {
-                    newButtons[i].Location = new Point(0, sidePanel.Controls[1].Location.Y + 53);
-                }
-                else
-                {
-                    newButtons[i].Location = new Point(0, newButtons[i - 1].Location.Y + 53);
-                }
-                newButtons[i].Size = new Size(182, 59);
-                newButtons[i].BackColor = Color.FromArgb(79, 83, 83);
-                newButtons[i].Font = new Font("Raleway Medium", 18.25f);
-                newButtons[i].ForeColor = Color.WhiteSmoke;
-                sidePanel.Controls.Add(newButtons[i]);
-            }
-            var backButton = new Button
-            {
-                Name = "btnBack",
-                Text = "Back",
-                Size = new Size(182, 59),
-                BackColor = Color.FromArgb(79, 83, 83),
-                Font = new Font("Raleway Medium", 18.25f),
-                ForeColor = Color.WhiteSmoke
-            };
-
-            backButton.Location = new Point(0, newButtons[newButtons.Count - 1].Location.Y + 53);
-            btnExit.Location = new Point(0, backButton.Location.Y + 53);
-
-            sidePanel.Controls.Add(backButton);
-
-            backButton.Click += BackButton_Click;
 
             frmLogs frm = new frmLogs()
             {
@@ -238,9 +154,10 @@ namespace Desktop
             frm.Show();
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-            camEnter.Start();
-        }
+        //private void MainForm_Load(object sender, EventArgs e)
+        //{
+        //    camEnter.Start();
+        //    camExit.Start();
+        //}
     }
 }

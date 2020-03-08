@@ -25,6 +25,12 @@ label{
     #btnForm{
         display:initial;
     }
+    #btnForm b {
+        width: 100%;
+        display: block;
+        text-align: center;
+        transform: rotateZ(90deg);
+    }
     .formRow{
         display:block;
     }

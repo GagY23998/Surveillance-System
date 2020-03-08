@@ -11,13 +11,14 @@ using AutoMapper;
 using DAL.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace reactApp.Controllers { 
-    [AllowAnonymous]
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class TokenController : ControllerBase
@@ -46,34 +47,38 @@ namespace reactApp.Controllers {
             return Convert.ToBase64String(inArray);
         }
 
-
+        [AllowAnonymous]
         [HttpPost]
         public UserDTO Post([FromBody]UserInsertRequest request)
         {
             var searchRequest = MyMapper.Map<UserSearchRequest>(request);
             var user = _context.Users.FirstOrDefault(_ => _.UserName == request.UserName);
             var password = GenerateHash(user.PasswordSalt, request.Password);
-
-
+           
+            
             if (user.PasswordHash == password)
             {
-
-                var claims = new Claim[]
+                var userRoles = _context.UserRoles.Include(_=>_.Role).Where(_ => _.UserId == user.Id).ToList();
+                var claims = new List<Claim>
                 {
                     new Claim("Id",user.Id.ToString()),
-                    new Claim(ClaimTypes.Role,"Admin"),
                     new Claim(JwtRegisteredClaimNames.Aud,_configuration["Jwt:Audience"])
                 };
+                foreach (var role in userRoles)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role,role.Role.Name));
+                }
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
                 var signInCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-                var token = new JwtSecurityToken(_configuration["Jwt:Issuer"], audience: _configuration["Jwt:Audience"], claims, expires: DateTime.Now.AddMinutes(5),signingCredentials:signInCredentials);
+                var token = new JwtSecurityToken(_configuration["Jwt:Issuer"], audience: _configuration["Jwt:Audience"], claims.ToArray(), expires: DateTime.Now.AddMinutes(5),signingCredentials:signInCredentials);
                 var writeToken= new JwtSecurityTokenHandler().WriteToken(token);
                 user.Token = writeToken;
                 _context.Users.Update(user);
                 _context.SaveChanges();
-                return MyMapper.Map<UserDTO>(user);
-
+                var returnUser = MyMapper.Map<UserDTO>(user);
+                returnUser.UserRoles = MyMapper.Map<List<UserRoleDTO>>(userRoles);
+                return returnUser;
             }
             else
             {

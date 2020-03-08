@@ -1,4 +1,5 @@
-﻿using AppCore.Requests;
+﻿using AForge.Video.DirectShow;
+using AppCore.Requests;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using System;
@@ -58,36 +59,94 @@ namespace Desktop.Users
             };
             UserDTO result = await _userService.Insert<UserDTO>(request);
             if (result == null)
+            {
                 MessageBox.Show("Couldn't add new user", "Info", MessageBoxButtons.OK);
+
+            }
+            _id = result.Id;
             MessageBox.Show("Successufully added new user", "Info", MessageBoxButtons.OK);
 
         }
 
-        private async void btnSetImage_Click(object sender, EventArgs e)
+        private async Task TakeImages(VideoCapture videoCapture)
         {
-            VideoCapture videoCapture = new VideoCapture(1);
-            
             List<Image<Gray, byte>> images = new List<Image<Gray, byte>>();
             int counter = 0;
-            while (counter != 50)
+            while (counter <= 20)
             {
+
                 Mat matImage = videoCapture.QueryFrame();
-                Image<Gray, byte> image = matImage.ToImage<Gray, byte>().Resize(240,180, Emgu.CV.CvEnum.Inter.Cubic);
-                Rectangle[] rectangles = classifier.DetectMultiScale(image, 1.1, 3);
-                
+
+                Image<Gray, byte> grayImage = matImage.ToImage<Gray, byte>();
+                grayImage._EqualizeHist();
+                Rectangle[] rectangles = classifier.DetectMultiScale(grayImage, 1.3, 5);
                 if (rectangles.Count() > 0)
                 {
-                    images.Add(image);
-            
-                }
-                counter++;
-            }
+                    var result = matImage.ToImage<Gray, byte>().Copy(rectangles[0]).Resize(100, 100, Emgu.CV.CvEnum.Inter.Cubic);
+                    result._EqualizeHist();
+                    imgBox_UserFace.Image = result;
+                    images.Add(result);
+                    counter++;
 
-            await faceRecognition.AddImagesToDb(images.ToArray(), _id.Value);
-            imgBox_UserFace.Image = images.Last();
-            MessageBox.Show("Done", "Info", MessageBoxButtons.OK);
-            videoCapture.Dispose();
-            faceRecognition.TrainImages();
+                }
+                await faceRecognition.AddImagesToDb(images.ToArray(), _id.Value);
+                var showImage = images.LastOrDefault().Clone();
+                imgBox_UserFace.Image = showImage.Resize(imgBox_UserFace.Size.Width, imgBox_UserFace.Size.Height, Emgu.CV.CvEnum.Inter.Cubic);
+            }
+        }
+
+        private async void btnSetImage_Click(object sender, EventArgs e)
+        {
+            if (_id.HasValue)
+            {
+                Program.camEnter.Stop();
+                 VideoCapture videoCapture = new VideoCapture(1);
+                 await TakeImages(videoCapture);
+                /*
+                 List<Image<Gray, byte>> images = new List<Image<Gray, byte>>();
+                 int counter = 0;
+                 while (counter <= 20)
+                 {
+
+                     Mat matImage = videoCapture.QueryFrame();
+
+                     Image<Gray, byte> grayImage=matImage.ToImage<Gray, byte>();
+                     grayImage._EqualizeHist();
+                     Rectangle[] rectangles = classifier.DetectMultiScale(grayImage,1.3,5);
+                     if (rectangles.Count() > 0)
+                     {
+                         var result = matImage.ToImage<Gray,byte>().Copy(rectangles[0]).Resize(100, 100, Emgu.CV.CvEnum.Inter.Cubic);
+                         result._EqualizeHist();
+                         imgBox_UserFace.Image = result;  
+                         images.Add(result);
+                         counter++;
+
+                     }
+                 }
+                    await faceRecognition.AddImagesToDb(images.ToArray(), _id.Value);
+                    var showImage = images.LastOrDefault().Clone();
+                 */
+
+
+               
+                DialogResult boxResult = MessageBox.Show("Please move to exit camera", "Info", MessageBoxButtons.OK);
+                
+                if(boxResult == DialogResult.OK)
+                {
+                    VideoCapture videoCapture2 = new VideoCapture(2);
+                    await TakeImages(videoCapture2);
+                }
+                MessageBox.Show("Images successufully added to the database", "Info", MessageBoxButtons.OK);
+
+                faceRecognition.TrainImages();
+                videoCapture.Dispose();
+                Program.camEnter = new VideoCapture(1);
+                Program.camExit = new VideoCapture(2);
+                Program.camEnter.ImageGrabbed += Program.CamEnter_ImageGrabbed;
+                Program.camExit.ImageGrabbed += Program.CamExit_ImageGrabbed;
+                Program.camEnter.Start();
+                Program.camExit.Start();
+            }
         }
 
         private async void frmAddUser_Load(object sender, EventArgs e)

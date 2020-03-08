@@ -1,9 +1,11 @@
 ﻿@media only screen and (max-width:600px){
     .myTable{
-        overflow:scroll;
+        overflow-y:auto;
     }
 }
-
+.myTable {
+    box-shadow: 0 0 10px 0 rgba(23,32,42,1);
+}
 .myTable th{
     text-align:center;
 }

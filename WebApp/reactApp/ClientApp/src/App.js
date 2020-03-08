@@ -37,9 +37,15 @@ const App = (props)=> {
                 data: signInData,
                 headers: configHeaders
             }).then(data => {
+                console.log(data);
                 localStorage.setItem("token", data.data.token);
+                let result = data.data.userRoles.reduce((prevVal,element)=>prevVal+element.role.name+",","");
+                console.log(result);
+                localStorage.setItem("roles", result);
                 props.history.push("/");
-            }).catch(err => localStorage.clear());
+            }).catch(err => {
+                localStorage.clear();
+            });
             
     };
 
@@ -49,7 +55,7 @@ const App = (props)=> {
           <React.Fragment>
                   <Switch>
                     <Route path="/signin" render={(props) => <SignIn signInHandler={signIn} {...props} />} />
-                    <Route path="/" render={(props) => <AuthRoute component={MainForm} {...props} />}/>
+                    <Route path="/" render={(props) => <MainForm {...props} />}/>
                   </Switch>     
         </React.Fragment>  
         </UserContext.Provider>

@@ -30,8 +30,16 @@ namespace Desktop
             }
             try
             {
-                var result = await url.WithHeader("Authorization",Token)/*.WithBasicAuth(Username,Password)*/.GetJsonAsync<T>();
-                return result;
+                if (string.IsNullOrEmpty(Token))
+                {
+                    var result = await url/*.WithBasicAuth(Username,Password)*/.GetJsonAsync<T>();
+                    return result;
+                }
+                else
+                {
+                    var result = await url.WithHeader("Authorization",Token)/*.WithBasicAuth(Username,Password)*/.GetJsonAsync<T>();
+                    return result;
+                }
             }
             catch (Exception ex)
             {

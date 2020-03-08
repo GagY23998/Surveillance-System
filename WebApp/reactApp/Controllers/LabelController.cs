@@ -14,7 +14,7 @@ using ZavrsniRad.Controllers;
 
 namespace reactApp.Controllers
 {
-    [Authorize]
+    [Authorize(Roles="Admin")]
     [ApiController]
     [Route("api/[controller]")]
     public class LabelController : BaseController<Label,LabelDTO,LabelInsertRequest,LabelInsertRequest,LabelSearchRequest>

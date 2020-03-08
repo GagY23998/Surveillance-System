@@ -45,5 +45,11 @@ namespace Desktop
                 MessageBox.Show(ex.Message, "Info", MessageBoxButtons.OK);
             }
         }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            this.Close();
+            Application.Exit();
+        }
     }
 }

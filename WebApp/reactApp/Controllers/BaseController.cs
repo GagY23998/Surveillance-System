@@ -44,13 +44,13 @@ namespace ZavrsniRad.Controllers
             return myObjects;
         }
         [HttpPost]
-        public ActionResult<EntityDTO> Post(EntityInsertRequest insertRequest)
+        public virtual ActionResult<EntityDTO> Post(EntityInsertRequest insertRequest)
         {
             var result = Service.Insert(insertRequest);
             return result;
         }
         [HttpPut("{id}")]
-        public ActionResult<EntityDTO> Put(int Id, EntityUpdateRequest updateRequest)
+        public virtual ActionResult<EntityDTO> Put(int Id, EntityUpdateRequest updateRequest)
         {
             var myObject = Service.Update(Id, updateRequest);
             return myObject;

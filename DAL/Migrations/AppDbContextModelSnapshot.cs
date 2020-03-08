@@ -49,26 +49,17 @@ namespace DAL.Migrations
                     b.Property<bool>("Entered")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Exception")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("EnteredDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("Left")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MessageTemplate")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("LeftDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<byte[]>("Picture")
                         .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("Properties")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("TimeStamp")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -142,8 +133,8 @@ namespace DAL.Migrations
                             Id = 1,
                             FirstName = "admin",
                             LastName = "admin",
-                            PasswordHash = "dqyqlgmgjUWo0lGt+3c8LAXcuV0=",
-                            PasswordSalt = "GMc2Cl0ffY6QC2ELKDpjVw==",
+                            PasswordHash = "xfX9++JBjWEDJTirjz8J0pvBkbA=",
+                            PasswordSalt = "C9h3e3JtAoPxD0sI7HT2SA==",
                             UserName = "admin"
                         });
                 });

@@ -4,9 +4,16 @@ import AxiosInstance from "./../../services/AuthService";
 
 const Filter = ({ searchArchiveHandler },...props) => {
 
+    const showFormHandler = (e) => {
+        let myForm = document.getElementById("theForm");
+        if (myForm.style.display == "block")
+            myForm.style.display = "none";
+        else
+            myForm.style.display = "block";
+    }
 
     return (<div>
-        <button id="btnForm">>></button>
+        <div id="btnForm" style={{width:"100%"}} onClick={showFormHandler}><b>III</b></div>
         <form onSubmit={searchArchiveHandler} id="theForm" className="form-inline" style={{padding:"5px 0 5px 0"}}>
             <div className="row formRow" >
 

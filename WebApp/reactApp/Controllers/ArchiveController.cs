@@ -12,6 +12,10 @@ using Microsoft.AspNetCore.Mvc;
 using ZavrsniRad.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.SignalR;
+using reactApp.Hubs;
+using Newtonsoft.Json;
+using System.Text;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -25,19 +29,39 @@ namespace reactApp.Controllers
         public int TotalVisits { get; set; }
     }
     
-    [Authorize]
+    [Authorize(Roles="Admin,User")]
     [ApiController]
     [Route("api/[controller]")]
     public class ArchiveController : BaseController<Log,LogDTO,LogInsertRequest,LogInsertRequest,LogSearchRequest>
     {
         // GET: api/<controller>
-        public ArchiveController(ILogInterface service,IMapper mapper):base(service,mapper)
+        IHubContext<ArchiveHub> _hubContext;
+        public ArchiveController(ILogInterface service,IMapper mapper,IHubContext<ArchiveHub> hubContext):base(service,mapper)
         {
-           
+            _hubContext = hubContext;
         }
 
-
-
+        [Authorize(Roles ="Admin")]
+        public override ActionResult<LogDTO> Post(LogInsertRequest insertRequest)
+        {
+            var res = base.Post(insertRequest);
+            if(res.Value != null)
+            {
+                _hubContext.Clients.All.SendAsync("RecieveMessage",res.Value);
+            }
+            return res;
+        }
+        [Authorize(Roles="Admin")]
+        public override ActionResult<LogDTO> Put(int Id, LogInsertRequest updateRequest)
+        {
+            var res =  base.Put(Id, updateRequest);
+            if (res.Value != null)
+            {
+                _hubContext.Clients.All.SendAsync("UpdateMessage", res.Value);
+            }
+            return res;
+        }
+        [Authorize(Roles="Admin,User")]
         [HttpGet("visits")]
         public VisitsDTO Visits() 
         {
@@ -50,6 +74,10 @@ namespace reactApp.Controllers
 
             var visitsToday = Service.Get(new LogSearchRequest { FromDate = zeroHours, ToDate = lastHour});
             var visitsMonth = Service.Get(new LogSearchRequest { FromDate =firstDay ,ToDate = lastDay});
+
+            
+
+
             var visitInfo = new VisitsDTO
             {
                 visitsToday = visitsToday,
@@ -58,6 +86,15 @@ namespace reactApp.Controllers
             };
 
             return visitInfo;        
+        }
+
+        [Authorize(Roles="User")]
+        [HttpGet("currentEntries")]
+        public List<LogDTO> CurrentEntries()
+        {
+            var res = Service.Get(new LogSearchRequest { FromDate = default(DateTime).AddHours(1), ToDate= default(DateTime).AddHours(1), Entered = true, Left = false });
+
+            return res;
         }
 
     }

@@ -16,6 +16,15 @@ namespace AppCore.Helper
             CreateMap<UserDTO, UserInsertRequest>().ReverseMap();
             CreateMap<UserInsertRequest, UserSearchRequest>().ReverseMap();
 
+            CreateMap<Role, RoleDTO>().ReverseMap();
+            CreateMap<Role, RoleInsertRequest>().ReverseMap();
+            CreateMap<RoleDTO, RoleInsertRequest>().ReverseMap();
+
+            CreateMap<UserRole, UserRoleDTO>().ReverseMap();
+            CreateMap<UserRoleDTO, UserRoleInsertRequest>();
+            CreateMap<UserRole, UserRoleInsertRequest>();
+
+
             CreateMap<Label, LabelDTO>().ReverseMap();
             CreateMap<LabelDTO, LabelInsertRequest>().ReverseMap();
             CreateMap<Label, LabelInsertRequest>().ReverseMap();

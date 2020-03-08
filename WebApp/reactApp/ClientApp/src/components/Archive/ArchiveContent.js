@@ -10,6 +10,9 @@ const ArchiveContent = (props) => {
 
     useEffect(() => { setData(data); }, [data]);
 
+   
+
+
     const searchArchiveHandler =  (e) => {
         e.preventDefault();
         const array = Array.prototype.slice.call(e.target.elements);
@@ -29,22 +32,20 @@ const ArchiveContent = (props) => {
                 Left: array.find(el => el.name === "Left").value === "on" ? true : false
             }
             }).then(data => setData(data.data)).catch(err => {
-                localStorage.clear();
-                props.history.push("/signin");
+                //localStorage.clear();
+                //props.history.push("/signin");
+                console.log(err);
             });
-        //if (result.status === "401") {
-        //    props.history.push("/signin");
-        //}
-        //const newArray = result.data.map(el => ({ ...el }));
-        //setData(newArray);
         
     }
-
-
+    const roles = localStorage["roles"].split(",").findIndex(el => el === "Admin") === -1 ? null : "Admin";
+    console.log(roles);
     return (
-        <div>
-            <Filter searchArchiveHandler={searchArchiveHandler} />
-            <Table tableData={data} />
+        <div style={{height:"100%",position:"relative"}}>
+            {(roles === "Admin") ?
+            (<React.Fragment><Filter searchArchiveHandler={searchArchiveHandler} />
+                    <Table tableData={data} /></React.Fragment>) : <p style={{fontWeight:"bold",position:"absolute",margin:"0",top:"50%",left:"50%",transform:"translate(-50%,-100%)"}}>You have no permission</p>
+                }
         </div> 
     );
     

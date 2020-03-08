@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DAL.Data;
 using DAL.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,7 +64,7 @@ namespace DAL.Services
                 if (propertyValue == null) continue;
                 if (propertyType == typeof(DateTime) && ((DateTime)propertyValue).Hour != 0)
                 {
-                    propertyValue = (object)((DateTime)propertyValue).AddHours(-1);
+                    propertyValue = ((DateTime)propertyValue).AddHours(-1);
                 }
                 if (propertyValue.Equals(defaultVal))
                 {
@@ -80,6 +81,27 @@ namespace DAL.Services
             return query;
         }
 
+        public IQueryable<Entity> SetIncludes(IQueryable<Entity> query,object request)
+        {
+
+            foreach (var prop in request.GetType().GetProperties())
+            {
+
+                if(prop.PropertyType == typeof(string) ||
+                   prop.PropertyType.IsValueType ||
+                   prop.PropertyType == typeof(DateTime))
+                {
+                    continue;
+                }
+                var res =prop.GetValue(request,null);
+                if(res == null)
+                {
+                    continue;
+                }
+                query.Include($"{prop.Name}");
+            }
+            return query;
+        }
 
 
         public EntityDTO Get(int id)
@@ -99,7 +121,7 @@ namespace DAL.Services
             var myQuery = _context.Set<Entity>().AsQueryable();
 
             myQuery = SearchWhereClause(myQuery, searchRequest);
-
+            myQuery = SetIncludes(myQuery, searchRequest);
             //if (myQuery.Count() == 0)
             //{
             //    return MyMapper.Map<IEnumerable<EntityDTO>>(_eTravelContext.Set<Entity>().ToList());
@@ -119,6 +141,7 @@ namespace DAL.Services
             {
                 _context.Add(myObject);
                 _context.SaveChanges();
+               
             }
             catch (Exception e)
             {
@@ -139,7 +162,10 @@ namespace DAL.Services
             map.GetType().GetProperty("Id").SetValue(map, objectId);
             _context.Update(map);
             _context.SaveChanges();
-            return MyMapper.Map<EntityDTO>(updateRequest);
+            
+            var res=  MyMapper.Map<EntityDTO>(updateRequest);
+            res.GetType().GetProperty("Id").SetValue(res, objectId);
+            return res;
         }
     }
 }

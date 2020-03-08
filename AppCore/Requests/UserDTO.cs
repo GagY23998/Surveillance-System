@@ -11,6 +11,7 @@ namespace AppCore.Requests
         public string LastName { get; set; }
         public string UserName { get; set; }
         public string Token { get; set; }
-       
+
+        public List<UserRoleDTO> UserRoles { get; set; } 
     }
 }

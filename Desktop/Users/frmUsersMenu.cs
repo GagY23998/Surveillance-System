@@ -34,7 +34,9 @@ namespace Desktop.Users
                 return;
             }
             dgv_Users.DataSource = new BindingSource(users, null);
-
+            dgv_Users.Columns[0].Visible = false;
+            dgv_Users.Columns[3].Visible = false;
+            dgv_Users.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
 
         private void btnAddUser_Click(object sender, EventArgs e)

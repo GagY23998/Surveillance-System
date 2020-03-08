@@ -127,3 +127,9 @@ C:\Users\User\source\repos\ZavrsniRad\Desktop\obj\Debug\Desktop.Users.frmAddUser
 C:\Users\User\source\repos\ZavrsniRad\Desktop\obj\Debug\Desktop.Users.frmUsersMenu.resources
 C:\Users\User\source\repos\ZavrsniRad\Desktop\obj\Debug\Desktop.Logs.frmLogs.resources
 C:\Users\User\source\repos\ZavrsniRad\Desktop\obj\Debug\Desktop.frmLogin.resources
+C:\Users\User\source\repos\ZavrsniRad\Desktop\bin\Debug\AForge.dll
+C:\Users\User\source\repos\ZavrsniRad\Desktop\bin\Debug\AForge.Video.DirectShow.dll
+C:\Users\User\source\repos\ZavrsniRad\Desktop\bin\Debug\AForge.Video.dll
+C:\Users\User\source\repos\ZavrsniRad\Desktop\bin\Debug\AForge.xml
+C:\Users\User\source\repos\ZavrsniRad\Desktop\bin\Debug\AForge.Video.xml
+C:\Users\User\source\repos\ZavrsniRad\Desktop\bin\Debug\AForge.Video.DirectShow.xml

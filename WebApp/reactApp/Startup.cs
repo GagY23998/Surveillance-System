@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
+using reactApp.Hubs;
 
 namespace reactApp
 {
@@ -74,11 +75,11 @@ namespace reactApp
             services.AddAuthorization(config =>
             {
                 config.AddPolicy("Bearer",new AuthorizationPolicyBuilder()
-                                             .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+                                             .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme).RequireRole("Admin","User")
                                              .RequireAuthenticatedUser()
                                              .Build());
             });
-            
+            services.AddSignalR();
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
@@ -114,10 +115,10 @@ namespace reactApp
             app.UseAuthentication();
             app.UseAuthorization();
 
-
-
+            
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<ArchiveHub>("/archivehub");
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "api/{controller}/{action=Index}/{id?}");

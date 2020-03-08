@@ -11,36 +11,56 @@ const Table = ({ headers, tableData }) => {
         hour: "numeric",
         minute:"numeric"
     };
+
     useEffect(() => {
-        console.log("From Table");
-        console.log(tableData);
         setDataArray(tableData);
     }, [tableData]);
 
 
+    const convertImage = (picture) => {
+        console.log(picture);
+        let binary = "";
+        let newBuffer = [].slice.call(new Uint8Array(picture));
+        console.log(newBuffer);
+        newBuffer.forEach(bin => binary += String.fromCharCode(bin));
+        let result = "data:image/png;base64, " + window.btoa(binary);
+
+        return result;
+    }
+
+    const showImage = (e) => {
+        console.log(e.target);
+        e.target.width = "200px";
+        e.target.height = "200px";
+    }
+    const closeImage = (e) => {
+        e.target.width = "20px";
+        e.target.height = "20px";
+    }
+
     return (
         <React.Fragment>
-            <table className="table table-bordered myTable">
-                <thead>
-                    {(headers) ? <tr><th colSpan="4">{headers}</th></tr>:null}
-                    <tr>
-                        <th>User</th>
-                        <th>Date</th>
-                        <th>Entered</th>
-                        <th>Left</th>
-                    </tr>
-                </thead>
-                <tbody> 
-                    {(dataArray && dataArray.length > 0) ? dataArray.map((el, index) => 
-                        <tr key={index}>
-                            <td>{el.user.firstName + ' ' + el.user.lastName}</td>
-                            <td>{new Date(el.timeStamp).toLocaleDateString("de-DE",dateOptions)}</td>
-                            <td>{(el.Entered && el.Entered === true) ? "YES" : "NO"}</td>
-                            <td>{(el.Left && el.Left === true) ? "YES" : "NO"}</td>
+            <div>
+                <table className="table table-striped myTable">
+                    <thead className="thead-light">
+                        {(headers) ? <tr><th colSpan="3">{headers}</th></tr>:null}
+                        <tr>
+                            <th>User</th>
+                            <th>Entered</th>
+                            <th>Left</th>
                         </tr>
-                    ):null}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody style={{ textAlign: "center" ,overflow:"scroll"}}> 
+                        {(dataArray && dataArray.length > 0) ? dataArray.map((el, index) => 
+                            <tr key={index}>
+                                <td>{el.user.firstName + ' ' + el.user.lastName}</td>
+                                <td>{(el.enteredDate) ? new Date(el.enteredDate).toLocaleTimeString("de-DE",dateOptions) : "NO"}</td>
+                                <td>{(el.leftDate) ? new Date(el.leftDate).toLocaleTimeString("de-DE",dateOptions) : "NO"}</td>
+                            </tr>
+                        ):null}
+                    </tbody>
+                </table>
+            </div>
         </React.Fragment>);
 
 
