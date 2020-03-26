@@ -163,6 +163,7 @@ namespace Desktop
             }
             catch (Exception e)
             {
+                TrainImages();
                 throw;
             }
             return null;

@@ -68,11 +68,12 @@ namespace Desktop.Users
 
         }
 
-        private async Task TakeImages(VideoCapture videoCapture)
+        private async Task TakeImages(int cameraNumber)
         {
+            VideoCapture videoCapture = new VideoCapture(cameraNumber);
             List<Image<Gray, byte>> images = new List<Image<Gray, byte>>();
             int counter = 0;
-            while (counter <= 20)
+            while (images.Count <= 20)
             {
 
                 Mat matImage = videoCapture.QueryFrame();
@@ -89,10 +90,12 @@ namespace Desktop.Users
                     counter++;
 
                 }
-                await faceRecognition.AddImagesToDb(images.ToArray(), _id.Value);
                 var showImage = images.LastOrDefault().Clone();
                 imgBox_UserFace.Image = showImage.Resize(imgBox_UserFace.Size.Width, imgBox_UserFace.Size.Height, Emgu.CV.CvEnum.Inter.Cubic);
             }
+                await faceRecognition.AddImagesToDb(images.ToArray(), _id.Value);
+                faceRecognition.TrainImages();
+
         }
 
         private async void btnSetImage_Click(object sender, EventArgs e)
@@ -100,8 +103,8 @@ namespace Desktop.Users
             if (_id.HasValue)
             {
                 Program.camEnter.Stop();
-                 VideoCapture videoCapture = new VideoCapture(1);
-                 await TakeImages(videoCapture);
+                Program.camExit.Stop();
+                await TakeImages(1);
                 /*
                  List<Image<Gray, byte>> images = new List<Image<Gray, byte>>();
                  int counter = 0;
@@ -133,19 +136,20 @@ namespace Desktop.Users
                 
                 if(boxResult == DialogResult.OK)
                 {
-                    VideoCapture videoCapture2 = new VideoCapture(2);
-                    await TakeImages(videoCapture2);
+                    await TakeImages(2);
                 }
                 MessageBox.Show("Images successufully added to the database", "Info", MessageBoxButtons.OK);
 
-                faceRecognition.TrainImages();
-                videoCapture.Dispose();
                 Program.camEnter = new VideoCapture(1);
                 Program.camExit = new VideoCapture(2);
                 Program.camEnter.ImageGrabbed += Program.CamEnter_ImageGrabbed;
                 Program.camExit.ImageGrabbed += Program.CamExit_ImageGrabbed;
                 Program.camEnter.Start();
                 Program.camExit.Start();
+            }
+            else
+            {
+                MessageBox.Show("Can't set image for unselected/nonexistent user", "OK", MessageBoxButtons.OK);
             }
         }
 

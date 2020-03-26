@@ -28,16 +28,15 @@ const ArchiveContent = (props) => {
                 LastName: array.find(el => el.name === "LastName").value,
                 FromDate: new Date(array.find(el => el.name === "FromDate").value).toJSON(),
                 ToDate: new Date(array.find(el => el.name === "ToDate").value).toJSON(),
-                Entered: array.find(el => el.name === "Entered").value === "on" ? true : false,
-                Left: array.find(el => el.name === "Left").value === "on" ? true : false
+                Entered: array.find(el => el.name === "Entered").checked,
+                Left: array.find(el => el.name === "Left").checked
             }
             }).then(data => setData(data.data)).catch(err => {
                 //localStorage.clear();
                 //props.history.push("/signin");
                 console.log(err);
             });
-        
-    }
+    }   
     const roles = localStorage["roles"].split(",").findIndex(el => el === "Admin") === -1 ? null : "Admin";
     console.log(roles);
     return (

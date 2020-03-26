@@ -36,7 +36,7 @@ namespace Desktop
 
             serialPort.DtrEnable = true;
             serialPort.RtsEnable = true;
-  //          serialPort.Open();
+           // serialPort.Open();
             camEnter.Start();
             camExit.Start();
             Application.EnableVisualStyles();

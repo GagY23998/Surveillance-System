@@ -34,9 +34,21 @@ namespace DAL.Services
             var query = _context.Set<Log>().AsQueryable();
 
             query = query.Include(_ => _.User);
-            
-            if((searchRequest.FromDate != new DateTime(1,1,1,1,0,0) && searchRequest.FromDate == default(DateTime) ) ||
-                (searchRequest.ToDate != new DateTime(1,1,1,1,0,0) && searchRequest.ToDate == default(DateTime)))
+
+            if (searchRequest.UserId == 0)
+            {
+                if (!(string.IsNullOrEmpty(searchRequest.FirstName) || string.IsNullOrEmpty(searchRequest.LastName)))
+                {
+                    query = query.Where(_ => _.User.FirstName == searchRequest.FirstName || _.User.LastName == searchRequest.LastName);
+                }
+
+            }
+            else
+            {
+                query = query.Where(_ => _.UserId == searchRequest.UserId);
+            }
+            if ((searchRequest.FromDate == new DateTime(1,1,1,1,0,0) || searchRequest.FromDate == default(DateTime) ) ||
+                (searchRequest.ToDate == new DateTime(1,1,1,1,0,0) || searchRequest.ToDate == default(DateTime)))
             {
                 query = query.Where(_ => (_.EnteredDate.HasValue && (_.EnteredDate >= DateTime.MinValue && _.EnteredDate <= DateTime.MaxValue)) ||
                          (_.LeftDate.HasValue && (_.LeftDate >= DateTime.MinValue && _.LeftDate <= DateTime.MaxValue)));
@@ -48,18 +60,7 @@ namespace DAL.Services
                                          (_.LeftDate.HasValue && (_.LeftDate >= searchRequest.FromDate && _.LeftDate <= searchRequest.ToDate)));
             }
 
-            if(searchRequest.UserId == 0)
-            {
-                if(!(string.IsNullOrEmpty(searchRequest.FirstName) || string.IsNullOrEmpty(searchRequest.LastName)))
-                {
-                    query = query.Where(_ => _.User.FirstName == searchRequest.FirstName || _.User.LastName == searchRequest.LastName);
-                }
-
-            }
-            else
-            {
-                query = query.Where(_ => _.UserId == searchRequest.UserId);
-            }
+           
 
 
             if (searchRequest.Entered)
