@@ -44,6 +44,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.txtBox_UserName = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
+            this.btn_Delete = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.imgBox_UserFace)).BeginInit();
             this.SuspendLayout();
             // 
@@ -140,7 +141,7 @@
             this.btnSetImage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(83)))), ((int)(((byte)(83)))));
             this.btnSetImage.Font = new System.Drawing.Font("Raleway Medium", 12F);
             this.btnSetImage.ForeColor = System.Drawing.Color.White;
-            this.btnSetImage.Location = new System.Drawing.Point(202, 110);
+            this.btnSetImage.Location = new System.Drawing.Point(200, 64);
             this.btnSetImage.Name = "btnSetImage";
             this.btnSetImage.Size = new System.Drawing.Size(142, 30);
             this.btnSetImage.TabIndex = 8;
@@ -213,12 +214,26 @@
             this.label6.TabIndex = 13;
             this.label6.Text = "User Name:";
             // 
+            // btn_Delete
+            // 
+            this.btn_Delete.BackColor = System.Drawing.Color.Red;
+            this.btn_Delete.Font = new System.Drawing.Font("Raleway Medium", 12F);
+            this.btn_Delete.ForeColor = System.Drawing.Color.White;
+            this.btn_Delete.Location = new System.Drawing.Point(200, 110);
+            this.btn_Delete.Name = "btn_Delete";
+            this.btn_Delete.Size = new System.Drawing.Size(142, 30);
+            this.btn_Delete.TabIndex = 15;
+            this.btn_Delete.Text = "Delete Images";
+            this.btn_Delete.UseVisualStyleBackColor = false;
+            this.btn_Delete.Click += new System.EventHandler(this.btn_Delete_Click);
+            // 
             // frmAddUser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(24)))), ((int)(((byte)(163)))), ((int)(((byte)(148)))));
             this.ClientSize = new System.Drawing.Size(800, 581);
+            this.Controls.Add(this.btn_Delete);
             this.Controls.Add(this.txtBox_UserName);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.txtBox_Confirm);
@@ -261,5 +276,6 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox txtBox_UserName;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Button btn_Delete;
     }
 }

@@ -71,11 +71,11 @@ namespace Desktop
             var url = $"{Properties.Settings.Default.WEBApi}/{_route}/{id}";
             return await url.AllowAnyHttpStatus().WithHeader("Authorization",Token).PutJsonAsync(request).ReceiveJson<T>();
         }
-        public async Task<T> Delete<T>(object id)
+        public async Task<bool> Delete(object id)
         {
             var url = $"{Properties.Settings.Default.WEBApi}/{_route}/{id}";
 
-            return await url.WithHeader("Authorization",Token).SendJsonAsync(HttpMethod.Delete, id).ReceiveJson<T>();
+            return await url.WithHeader("Authorization",Token).DeleteAsync().ReceiveJson<bool>();
         }
     }
 }

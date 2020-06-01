@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,8 +20,12 @@ namespace Desktop.Users
 
         private APIService _userService = new APIService("user");
         private APIService _labelService = new APIService("label");
+        private APIService _userRoleService = new APIService("userrole");
+        private APIService _roleService = new APIService("role");
+        const int minNeighbours = 5;
+        const double scaleSize = 1.05;
         int? _id = null;
-        private CascadeClassifier classifier = new CascadeClassifier(@"../../Assets/haarcascade_frontalface_default.xml");
+        private CascadeClassifier classifier = new CascadeClassifier(@"../../Assets/haarcascade_frontalface_alt.xml");
         private FaceRecognitionDB faceRecognition = new FaceRecognitionDB();
         public frmAddUser(int? id=null)
         {
@@ -49,22 +54,39 @@ namespace Desktop.Users
                 MessageBox.Show("User already exists", "Info", MessageBoxButtons.OK);
                 return;
             }
+            
+            
+            RoleDTO role = (await _roleService.Get<List<RoleDTO>>(null)).FirstOrDefault(_ => _.Name == "User");
+
+
+
             UserInsertRequest request = new UserInsertRequest
             {
                 UserName = txtBox_UserName.Text,
                 FirstName = txtBox_FirstName.Text,
                 LastName = txtBox_LastName.Text,
                 Password = txtBox_Password.Text,
-                PasswordConfirmation = txtBox_Confirm.Text
+                PasswordConfirmation = txtBox_Confirm.Text,
+                Roles =  new List<RoleDTO> { role }
             };
-            UserDTO result = await _userService.Insert<UserDTO>(request);
-            if (result == null)
+            try
             {
-                MessageBox.Show("Couldn't add new user", "Info", MessageBoxButtons.OK);
 
+                UserDTO userResult = await _userService.Insert<UserDTO>(request);
+                
+                if (userResult == null)
+                {
+                    MessageBox.Show("Couldn't add new user", "Info", MessageBoxButtons.OK);
+
+                }
+                _id = userResult.Id;
+                MessageBox.Show("Successufully added new user", "Info", MessageBoxButtons.OK);
+            }catch(Exception exc)
+            {
+                frmLogin frm = new frmLogin();
+                this.Hide();
+                frm.Show();
             }
-            _id = result.Id;
-            MessageBox.Show("Successufully added new user", "Info", MessageBoxButtons.OK);
 
         }
 
@@ -73,14 +95,14 @@ namespace Desktop.Users
             VideoCapture videoCapture = new VideoCapture(cameraNumber);
             List<Image<Gray, byte>> images = new List<Image<Gray, byte>>();
             int counter = 0;
-            while (images.Count <= 20)
+            while (images.Count<10)
             {
 
                 Mat matImage = videoCapture.QueryFrame();
 
                 Image<Gray, byte> grayImage = matImage.ToImage<Gray, byte>();
                 grayImage._EqualizeHist();
-                Rectangle[] rectangles = classifier.DetectMultiScale(grayImage, 1.3, 5);
+                Rectangle[] rectangles = classifier.DetectMultiScale(grayImage,scaleSize, minNeighbours);
                 if (rectangles.Count() > 0)
                 {
                     var result = matImage.ToImage<Gray, byte>().Copy(rectangles[0]).Resize(100, 100, Emgu.CV.CvEnum.Inter.Cubic);
@@ -88,13 +110,12 @@ namespace Desktop.Users
                     imgBox_UserFace.Image = result;
                     images.Add(result);
                     counter++;
-
+                    
                 }
-                var showImage = images.LastOrDefault().Clone();
-                imgBox_UserFace.Image = showImage.Resize(imgBox_UserFace.Size.Width, imgBox_UserFace.Size.Height, Emgu.CV.CvEnum.Inter.Cubic);
             }
                 await faceRecognition.AddImagesToDb(images.ToArray(), _id.Value);
-                faceRecognition.TrainImages();
+                var showImage = images.FirstOrDefault().Clone();
+                imgBox_UserFace.Image = showImage.Resize(imgBox_UserFace.Size.Width, imgBox_UserFace.Size.Height, Emgu.CV.CvEnum.Inter.Cubic);
 
         }
 
@@ -139,6 +160,7 @@ namespace Desktop.Users
                     await TakeImages(2);
                 }
                 MessageBox.Show("Images successufully added to the database", "Info", MessageBoxButtons.OK);
+                faceRecognition.TrainImages();
 
                 Program.camEnter = new VideoCapture(1);
                 Program.camExit = new VideoCapture(2);
@@ -149,7 +171,7 @@ namespace Desktop.Users
             }
             else
             {
-                MessageBox.Show("Can't set image for unselected/nonexistent user", "OK", MessageBoxButtons.OK);
+                MessageBox.Show("Can't set image for unselected/non-existent user", "OK", MessageBoxButtons.OK);
             }
         }
 
@@ -164,6 +186,29 @@ namespace Desktop.Users
                     txtBox_LastName.Text = user.LastName;
                     txtBox_UserName.Text = user.UserName;
                 }
+            }
+        }
+
+        private async void btn_Delete_Click(object sender, EventArgs e)
+        {
+            var labels = await _labelService.Get<List<LabelDTO>>(new LabelSearchRequest { UserId = _id.Value});
+            UserDTO user = await _userService.GetById<UserDTO>(_id.Value);
+            foreach (var label in labels)
+            {
+                bool res = await _labelService.Delete(label.Id);
+                if (!res) MessageBox.Show("Problem occured during removing images", "Info", MessageBoxButtons.OK);
+            }
+            string userString = user.FirstName + "-" + user.LastName;
+
+            string pathToDirectory = Application.StartupPath + @"/../../Images/" + userString;
+            foreach( string file in Directory.GetFiles(pathToDirectory, "*.*"))
+            {
+                File.Delete(file);
+            }
+            Directory.Delete(pathToDirectory);
+            if (!Directory.Exists(pathToDirectory))
+            {
+                MessageBox.Show("Successufully removed images", "Info", MessageBoxButtons.OK);
             }
         }
     }

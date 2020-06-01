@@ -61,7 +61,7 @@ namespace DAL.Migrations
                     b.Property<byte[]>("Picture")
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -133,8 +133,8 @@ namespace DAL.Migrations
                             Id = 1,
                             FirstName = "admin",
                             LastName = "admin",
-                            PasswordHash = "xfX9++JBjWEDJTirjz8J0pvBkbA=",
-                            PasswordSalt = "C9h3e3JtAoPxD0sI7HT2SA==",
+                            PasswordHash = "hcTHyaEwO9awIU1/QK6EaIux+hM=",
+                            PasswordSalt = "pGNRmCL0soP0Df+oxlJW/A==",
                             UserName = "admin"
                         });
                 });
@@ -174,9 +174,7 @@ namespace DAL.Migrations
                 {
                     b.HasOne("AppCore.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("AppCore.Models.UserRole", b =>

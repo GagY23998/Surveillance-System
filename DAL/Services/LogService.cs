@@ -37,9 +37,9 @@ namespace DAL.Services
 
             if (searchRequest.UserId == 0)
             {
-                if (!(string.IsNullOrEmpty(searchRequest.FirstName) || string.IsNullOrEmpty(searchRequest.LastName)))
+                if (!string.IsNullOrEmpty(searchRequest.FirstName) || !string.IsNullOrEmpty(searchRequest.LastName))
                 {
-                    query = query.Where(_ => _.User.FirstName == searchRequest.FirstName || _.User.LastName == searchRequest.LastName);
+                    query = query.Where(_ => (_.User.FirstName == searchRequest.FirstName || _.User.LastName == searchRequest.LastName) && _.UserId.HasValue);
                 }
 
             }
@@ -59,14 +59,18 @@ namespace DAL.Services
                 query = query.Where(_ => (_.EnteredDate.HasValue && (_.EnteredDate >= searchRequest.FromDate && _.EnteredDate <= searchRequest.ToDate)) ||
                                          (_.LeftDate.HasValue && (_.LeftDate >= searchRequest.FromDate && _.LeftDate <= searchRequest.ToDate)));
             }
-
-           
-
-
-            if (searchRequest.Entered)
+            
+            if (searchRequest.Entered.HasValue)
             {
-                query = query.Where(_ => _.Entered == searchRequest.Entered && _.Left == searchRequest.Left);
+                query = query.Where(_ => _.Entered == searchRequest.Entered );
             }
+            
+            
+            if (searchRequest.Left.HasValue)
+            {
+                query = query.Where(_ => _.Left == searchRequest.Left);
+            }
+            
 
             return MyMapper.Map<List<LogDTO>>(query.ToList());
         }

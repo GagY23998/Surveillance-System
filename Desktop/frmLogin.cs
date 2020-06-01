@@ -33,12 +33,16 @@ namespace Desktop
                 APIService.Username = txtBox_UserName.Text;
                 APIService.Password = mTxtBox_Password.Text;
                 var user =await service.Insert<UserDTO>(new UserInsertRequest { UserName = txtBox_UserName.Text,Password = mTxtBox_Password.Text});
-                if(user != null)
+                if (user != null && user.UserRoles.Any(_ => _.Role.Name == "Admin")) 
                 {
                     APIService.Token = "Bearer " +user.Token;
                     MainForm frm = new MainForm();
                     frm.Show();
                     this.Hide();
+                }
+                else
+                {
+                    MessageBox.Show("Only admin can login", "Info", MessageBoxButtons.OK);
                 }
             }catch(Exception ex)
             {

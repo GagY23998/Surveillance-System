@@ -3,21 +3,31 @@ import { withRouter } from "react-router-dom";
 import AxiosInstance from "./../../services/AuthService";
 import Filter from "./Filter";
 import Table from "./Table";
+import Modal from "../Modal/Modal";
+
 
 const ArchiveContent = (props) => {
 
     const [data, setData] = useState([]);
+    const [modalData, setModalData] = useState(null);
 
-    useEffect(() => { setData(data); }, [data]);
+    //useEffect(() => { setData(data); }, [data]);
 
    
+    const showModalData = (info) => {
+        setModalData(info);
+    }
 
+    const closeModalHandler = () => {
+        setModalData(null);
+    }
 
     const searchArchiveHandler =  (e) => {
         e.preventDefault();
         const array = Array.prototype.slice.call(e.target.elements);
-
-        AxiosInstance.axios.get("/archive", {
+        console.log(array.find(el => el.name === "Entered"));
+        console.log(array);
+        AxiosInstance.get("/archive", {
             headers: {
                 "content-type": "application/json; charset=utf-8",
                 "accept": "application/json",
@@ -32,18 +42,18 @@ const ArchiveContent = (props) => {
                 Left: array.find(el => el.name === "Left").checked
             }
             }).then(data => setData(data.data)).catch(err => {
-                //localStorage.clear();
-                //props.history.push("/signin");
-                console.log(err);
+                localStorage.clear();
+                props.history.push("/signin");
             });
     }   
     const roles = localStorage["roles"].split(",").findIndex(el => el === "Admin") === -1 ? null : "Admin";
     console.log(roles);
     return (
-        <div style={{height:"100%",position:"relative"}}>
+        <div style={{ height: "95%", position: "relative" }}>
+            <Modal onClose={closeModalHandler} info={modalData} />
             {(roles === "Admin") ?
             (<React.Fragment><Filter searchArchiveHandler={searchArchiveHandler} />
-                    <Table tableData={data} /></React.Fragment>) : <p style={{fontWeight:"bold",position:"absolute",margin:"0",top:"50%",left:"50%",transform:"translate(-50%,-100%)"}}>You have no permission</p>
+                    <Table showModal={showModalData} tableData={data} /></React.Fragment>) : <p style={{fontWeight:"bold",position:"absolute",margin:"0",top:"50%",left:"50%",transform:"translate(-50%,-100%)"}}>You have no permission</p>
                 }
         </div> 
     );

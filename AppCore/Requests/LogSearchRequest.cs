@@ -12,7 +12,7 @@ namespace AppCore.Requests
         public string LastName { get; set; }
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
-        public bool Entered { get; set; }
-        public bool Left { get; set; }
+        public bool? Entered { get; set; }
+        public bool? Left { get; set; }
     }
 }

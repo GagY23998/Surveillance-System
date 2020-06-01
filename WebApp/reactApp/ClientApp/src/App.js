@@ -19,6 +19,7 @@ const App = (props)=> {
         if (localStorage["token"]) {
             setToken(localStorage["token"]);
         }
+        return () => { console.log("Cleaning storage"); localStorage.clear(); };
     },[]);
 
     const signIn = (e) => {
@@ -31,7 +32,7 @@ const App = (props)=> {
             "content-type": "application/json; charset=utf-8",
             "Accept": "application/json"
         };
-        AuthService.axios.post("/token",
+        AuthService.post("/token",
             null,
             {
                 data: signInData,

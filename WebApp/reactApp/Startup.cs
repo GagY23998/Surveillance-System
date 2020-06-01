@@ -19,6 +19,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using reactApp.Hubs;
+using System;
 
 namespace reactApp
 {
@@ -51,6 +52,7 @@ namespace reactApp
             services.AddScoped<IUserInterface, UserService>();
             services.AddScoped<ILogInterface, LogService>();
             services.AddScoped<ILabelService, LabelService>();
+            services.AddScoped<IRoleService, RoleService>();
 
             services.AddAuthentication(o=>
             {
@@ -69,7 +71,8 @@ namespace reactApp
                     ValidIssuer = Configuration["Jwt:Issuer"],
                     ValidAudience = Configuration["Jwt:Audience"],
                     ValidateIssuer = false,
-                    ValidateAudience = false
+                    ValidateAudience = false,
+                    RequireExpirationTime = true
                 };
             });
             services.AddAuthorization(config =>

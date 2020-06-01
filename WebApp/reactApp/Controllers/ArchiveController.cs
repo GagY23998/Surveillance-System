@@ -69,11 +69,11 @@ namespace reactApp.Controllers
             var zeroHours = Date.AddHours(-Date.Hour).AddMinutes(-Date.Minute).AddSeconds(-Date.Second);
             var lastHour = Date.AddHours(-Date.Hour+24).AddMinutes(-Date.Minute).AddSeconds(-Date.Second);
          
-            var firstDay = Date.AddDays(-Date.Day);
-            var lastDay = Date.AddDays(-Date.Day + DateTime.DaysInMonth(Date.Year,Date.Month));
+            var firstDate = DateTime.Now.AddDays(-DateTime.Now.Day).AddHours(-DateTime.Now.Hour).AddMinutes(-DateTime.Now.Minute).AddSeconds(-DateTime.Now.Second).AddDays(1);
+            var lastDate = firstDate.AddDays(DateTime.DaysInMonth(firstDate.Year, firstDate.Month)).AddDays(-1);
 
             var visitsToday = Service.Get(new LogSearchRequest { FromDate = zeroHours, ToDate = lastHour});
-            var visitsMonth = Service.Get(new LogSearchRequest { FromDate =firstDay ,ToDate = lastDay});
+            var visitsMonth = Service.Get(new LogSearchRequest { FromDate =firstDate ,ToDate = lastDate});
 
             
 
@@ -88,11 +88,11 @@ namespace reactApp.Controllers
             return visitInfo;        
         }
 
-        [Authorize(Roles="User")]
+        [Authorize(Roles="Admin,User")]
         [HttpGet("currentEntries")]
         public List<LogDTO> CurrentEntries()
         {
-            var res = Service.Get(new LogSearchRequest { FromDate = default(DateTime).AddHours(1), ToDate= default(DateTime).AddHours(1), Entered = true, Left = false });
+            var res = Service.Get(new LogSearchRequest { FromDate = default(DateTime).AddHours(1), ToDate= default(DateTime).AddHours(1),Entered = true, Left = false });
 
             return res;
         }

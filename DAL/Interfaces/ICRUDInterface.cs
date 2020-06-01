@@ -13,7 +13,7 @@ namespace DAL.Interfaces
     {
         EntityDTO Insert(InsertRequest InsertRequest);
         EntityDTO Update(int objectId, UpdateRequest updateRequest);
-        EntityDTO Delete(int Id);
+        bool Delete(int Id);
         EntityDTO Get(int id);
         List<EntityDTO> Get(SearchRequest searchRequest);
         IEnumerable<EntityDTO> GetAll();

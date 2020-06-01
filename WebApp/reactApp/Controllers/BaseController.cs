@@ -56,7 +56,7 @@ namespace ZavrsniRad.Controllers
             return myObject;
         }
         [HttpDelete("{id}")]
-        public ActionResult<EntityDTO> Delete(int Id)
+        public ActionResult<bool> Delete(int Id)
         {
             var res = Service.Delete(Id);
             return res;

@@ -16,6 +16,7 @@ namespace ZavrsniRad.Helpers
         ActionResult<EntityDTO> Get(int id);
         ActionResult<EntityDTO> Post([FromQuery]EntityInsertRequest insertRequest);
         ActionResult<EntityDTO> Put(int Id, [FromQuery]EntityUpdateRequest updateRequest);
+        ActionResult<bool> Delete(int id);
         //  ActionResult<IEnumerable<EntityDTO>> GetAll();
     }
 }

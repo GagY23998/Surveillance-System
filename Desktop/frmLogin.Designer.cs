@@ -55,9 +55,9 @@
             this.label1.ForeColor = System.Drawing.Color.WhiteSmoke;
             this.label1.Location = new System.Drawing.Point(61, 93);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(101, 20);
+            this.label1.Size = new System.Drawing.Size(94, 20);
             this.label1.TabIndex = 1;
-            this.label1.Text = "User Name:";
+            this.label1.Text = "Username:";
             // 
             // mTxtBox_Password
             // 

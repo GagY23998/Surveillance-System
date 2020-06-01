@@ -1,4 +1,5 @@
-﻿using Emgu.CV;
+﻿using AppCore.Requests;
+using Emgu.CV;
 using Emgu.CV.Structure;
 using Serilog;
 using Serilog.Sinks.MSSqlServer;
@@ -6,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Threading;
@@ -22,11 +25,16 @@ namespace Desktop
         public static VideoCapture camEnter = new VideoCapture(1);
         public static VideoCapture camExit = new VideoCapture(2);
         public static SerialPort serialPort = new SerialPort("COM3",9600);
+        private static APIService _archiveService = new APIService("archive");
         private static FaceRecognitionDB faceRecognition = new FaceRecognitionDB();
-        private static CascadeClassifier classifier = new CascadeClassifier(@"../../Assets/haarcascade_frontalface_default.xml");
+        private static CascadeClassifier classifier = new CascadeClassifier(@"../../Assets/haarcascade_frontalface_alt.xml");
         private static APIService _tokenService = new APIService("token");
         private static bool isBusyEnter = false;
         private static bool isBusyLeave = false;
+        const int minNeighbours = 5;
+        const double scaleSize = 1.05;
+        static bool timeout = true;
+        static System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
         [STAThread]
         static void Main()
         {
@@ -36,14 +44,26 @@ namespace Desktop
 
             serialPort.DtrEnable = true;
             serialPort.RtsEnable = true;
-           // serialPort.Open();
-            camEnter.Start();
-            camExit.Start();
+         //   serialPort.Open();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            timer.Interval = 10000;
+            timer.Tick += Timer_Tick;
+            camEnter.Start();
+            camExit.Start();
+            timer.Start();
+
+
+
             Application.Run(new frmLogin());
+         
 
+        }
 
+        private static void Timer_Tick(object sender, EventArgs e)
+        {
+            if (!timeout) timeout = true;
         }
 
         public static async void CamEnter_ImageGrabbed(object sender, EventArgs e)
@@ -57,16 +77,45 @@ namespace Desktop
                   
                     Image<Gray, byte> grayImage = matImage.ToImage<Gray, byte>();
                     grayImage._EqualizeHist();
-                    Rectangle[] rectangles = classifier.DetectMultiScale(grayImage, 1.3, 5);
+                    Rectangle[] rectangles = classifier.DetectMultiScale(grayImage, scaleSize,minNeighbours);
+                    Image<Gray, byte> image = null;
                     if (rectangles.Count() > 0)
                     {
-                        var image = matImage.ToImage<Gray,byte>().Copy(rectangles[0]).Resize(100, 100, Emgu.CV.CvEnum.Inter.Cubic);
+                         image = matImage.ToImage<Gray,byte>().Copy(rectangles[0]).Resize(100, 100, Emgu.CV.CvEnum.Inter.Cubic);
                         image._EqualizeHist();
-                        var result =await faceRecognition.Predict(image, StateType.Entered);
-                        if(result != null && serialPort.IsOpen)
+                        var result =await faceRecognition.Predict(image, StateType.Entered,grayImage);
+                        if(result.Key != null && serialPort.IsOpen)
                         {
                             byte myByte = Convert.ToByte('O');
                             serialPort.Write(new byte[] { myByte },0,1);
+                        }
+                        else if(result.Value != int.MaxValue)
+                        {
+                            var firstTest = classifier.DetectMultiScale(grayImage, 1.2, 3);
+                            var thirdTest = classifier.DetectMultiScale(grayImage, scaleSize, 7);
+                            bool condition = firstTest[0] == rectangles[0] && rectangles[0] == thirdTest[0]
+                                || (rectangles[0].X - firstTest[0].X  <= 10 && rectangles[0].Y - firstTest[0].Y <= 10 || (firstTest[0].Y - rectangles[0].Y<=10 && firstTest[0].X-rectangles[0].X<=10))
+                                && ((thirdTest[0].X - rectangles[0].X <=10  && thirdTest[0].Y - rectangles[0].Y <=10) ||(rectangles[0].X-thirdTest[0].X <=10) && rectangles[0].Y-thirdTest[0].Y<=10);
+                            if (timeout && (result.Value > 4000 && result.Value < 5000) && condition) 
+                            {
+                                using (var ms = new MemoryStream())
+                                {
+                                    Bitmap bitmap = grayImage.ToBitmap();
+                                    bitmap.Save(ms, ImageFormat.Png);
+                                    byte[] myArray = ms.ToArray();
+
+                                    await _archiveService.Insert<LogDTO>(new LogInsertRequest
+                                    {
+                                        EnteredDate = DateTime.Now,
+                                        LeftDate = DateTime.Now,
+                                        Picture = myArray,
+                                        UserId = null,
+                                        Entered = true,
+                                        Left = true
+                                    });
+                                }
+                            }
+                            timeout = false;
                         }
                     }
                     isBusyEnter = false;
@@ -95,14 +144,14 @@ namespace Desktop
                     
                     Image<Gray, byte> grayImage = matImage.ToImage<Gray, byte>();
                     grayImage._EqualizeHist();
-                    Rectangle[] rectangles = classifier.DetectMultiScale(grayImage, 1.3, 5);
+                    Rectangle[] rectangles = classifier.DetectMultiScale(grayImage, scaleSize,minNeighbours);
                     if (rectangles.Count() > 0)
                     {
                         var image = matImage.ToImage<Gray,byte>().Copy(rectangles[0]).Resize(100, 100, Emgu.CV.CvEnum.Inter.Cubic);
                         image._EqualizeHist();
-                        var result =  await faceRecognition.Predict(image, StateType.Left);
+                        var result =  await faceRecognition.Predict(image, StateType.Left,grayImage);
                         
-                        if (result != null && serialPort.IsOpen)
+                        if (result.Key != null && serialPort.IsOpen)
                         {
                             byte myByte = Convert.ToByte('O');
                             serialPort.Write(new byte[] { myByte }, 0, 1);

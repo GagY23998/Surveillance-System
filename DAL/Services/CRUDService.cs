@@ -26,13 +26,13 @@ namespace DAL.Services
 
         public AppDbContext _context { get; }
         public IMapper MyMapper { get; }
-        public EntityDTO Delete(int Id)
-        {
-            var myObject = _context.Find<Entity>(Id);
-            _context.Remove(myObject);
-            _context.SaveChanges();
-            return MyMapper.Map<EntityDTO>(myObject);
-        }
+        //public EntityDTO Delete(int Id)
+        //{
+        //    var myObject = _context.Find<Entity>(Id);
+        //    _context.Remove(myObject);
+        //    _context.SaveChanges();
+        //    return MyMapper.Map<EntityDTO>(myObject);
+        //}
 
         private object GetDefaultTypeValue(Type myType)
         {
@@ -166,6 +166,17 @@ namespace DAL.Services
             var res=  MyMapper.Map<EntityDTO>(updateRequest);
             res.GetType().GetProperty("Id").SetValue(res, objectId);
             return res;
+        }
+        public virtual bool Delete(int id)
+        {
+            Entity target = _context.Find<Entity>(id);
+            if(target == null)
+            {
+                return false;
+            }
+            _context.Remove(target);
+            _context.SaveChanges();
+            return true;
         }
     }
 }

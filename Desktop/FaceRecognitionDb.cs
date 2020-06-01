@@ -25,11 +25,13 @@ namespace Desktop
     }
     public class FaceRecognitionDB
     {
-        const double threshold = double.PositiveInfinity;
+        const int threshold = 3000;
+        const int fisherThershold = 800;
+        const int LBPHThershold = 100;
         EigenFaceRecognizer faceRecognizer = new EigenFaceRecognizer(80, threshold);
-        //      FisherFaceRecognizer fisherRecognizer = new FisherFaceRecognizer(80, 1000);
-        //      LBPHFaceRecognizer LBPHFaceRecognizer = new LBPHFaceRecognizer(80, 1000);
-        private CascadeClassifier classifier = new CascadeClassifier(@"../../Assets/haarcascade_frontalface_default.xml");
+        FisherFaceRecognizer fisherRecognizer = new FisherFaceRecognizer(10, fisherThershold);
+        LBPHFaceRecognizer LBPHFaceRecognizer = new LBPHFaceRecognizer(5,8,8,8, LBPHThershold);
+        private CascadeClassifier classifier = new CascadeClassifier(@"../../Assets/haarcascade_frontalface_alt.xml");
         APIService _labelService = new APIService("label");
         APIService _userService = new APIService("user");
         APIService _archiveService = new APIService("archive");
@@ -39,8 +41,9 @@ namespace Desktop
             try
             {
                 faceRecognizer.Read(Application.StartupPath + @"/../../Images/faceRecognizer.yml");
-                //fisherRecognizer.Read(Application.StartupPath + @"/../../Image/faceRecognizer.yml");
-
+                fisherRecognizer.Read(Application.StartupPath + @"/../../Images/fisherRecognizer.yml");
+                LBPHFaceRecognizer.Read(Application.StartupPath + @"/../../Images/lpbhRecognizer.yml");
+               
             }
             catch (Exception)
             {
@@ -58,7 +61,7 @@ namespace Desktop
         {
             if (!images.All(_ => _.Size.Width == 100 && _.Size.Height == 100)) return false;
 
-            images = images.Where(image => classifier.DetectMultiScale(image, 1.1, 3).Count() > 0).ToArray();
+      //      images = images.Where(image => classifier.DetectMultiScale(image, 1.3, 5).Count() > 0).ToArray();
 
             var user = await _userService.GetById<UserDTO>(id);
             if (user == null) return false;
@@ -84,7 +87,7 @@ namespace Desktop
                 string imagePath = path + string.Concat(user.FirstName, "-", user.LastName, "-", "image", "-", (totalLabels + 1).ToString(), ".jpg");
                 AppCore.Requests.LabelInsertRequest label = new AppCore.Requests.LabelInsertRequest { UserLabel = totalLabels + 1, UserId = user.Id };
 
-                await _labelService.Insert<LabelDTO>(label);
+                await _labelService.Insert<LabelDTO>(label); 
 
                 image.Save(imagePath);
                 ++totalLabels;
@@ -94,79 +97,89 @@ namespace Desktop
 
         }
 
-        public async Task<UserDTO> Predict(Image<Gray, byte> image,StateType type)
+        public async Task<KeyValuePair<UserDTO,int>> Predict(Image<Gray, byte> image,StateType type,Image<Gray,byte> originalImage)
         {
             try
             {
-
-                if (classifier.DetectMultiScale(image, 1.1, 3).Count() > 0)
-                {
-
                 var res = faceRecognizer.Predict(image);
-                //var res = fisherRecognizer.Predict(image); 
+                var fisherResult = fisherRecognizer.Predict(image);
+                var lbphResult = LBPHFaceRecognizer.Predict(image);
+                var retValue = new KeyValuePair<UserDTO, int>(null, (int)res.Distance);
 
-            if (res.Distance <3500)
-            {
-                var label = (await _labelService.Get<List<LabelDTO>>(new LabelSearchRequest { UserLabel = res.Label})).FirstOrDefault();
-                var user = await _userService.GetById<UserDTO>(label.UserId);
-                if (user != null)
+
+                if (res.Distance <threshold && lbphResult.Distance < LBPHThershold)
                 {
-                    var logs= (await _archiveService.Get<List<LogDTO>>(new LogSearchRequest { Entered = true, UserId = user.Id, Left = false })).FirstOrDefault();
-                    
-                    if(type == StateType.Left)
+                    var label = (await _labelService.Get<List<LabelDTO>>(new LabelSearchRequest { UserLabel = res.Label})).FirstOrDefault();
+                    var user = await _userService.GetById<UserDTO>(label.UserId);
+                    if (user != null)
                     {
-                        if (logs != null)
+                        var logs = (await _archiveService.Get<List<LogDTO>>(new LogSearchRequest { Entered = true, UserId = user.Id, Left = false })).FirstOrDefault();
+
+                        if (type == StateType.Left)
                         {
-                            var updateLog = new LogInsertRequest
+                            if (logs != null)
                             {
-                                UserId = logs.UserId,
-                                EnteredDate = logs.EnteredDate,
-                                LeftDate = DateTime.Now,
-                                Entered = logs.Entered,
-                                Left = true,
-                                Picture = logs.Picture
-                            };
-                            var resUpdate = await _archiveService.Update<LogDTO>(logs.Id,updateLog);
-                        
-                                    if (resUpdate == null)
-                                    {
-                                        return null;
-                                    }
-                                    else
-                                    {
-                                        return user;
-                                    }
+                                var updateLog = new LogInsertRequest
+                                {
+                                    UserId = logs.UserId,
+                                    EnteredDate = logs.EnteredDate,
+                                    LeftDate = DateTime.Now,
+                                    Entered = logs.Entered,
+                                    Left = true,
+                                    Picture = logs.Picture
+                                };
+                                var resUpdate = await _archiveService.Update<LogDTO>(logs.Id, updateLog);
+
+                                if (resUpdate == null)
+                                {
+                                    return new KeyValuePair<UserDTO, int>(null, 0);
+                                }
+                                else
+                                {
+                                    return new KeyValuePair<UserDTO, int>(user, (int)res.Distance);
+                                }
+                            }
+                        }
+                        else if (logs == null)
+                        {
+                            LogDTO result = null;
+                            using (var ms = new MemoryStream())
+                            {
+                                Bitmap bitmap = originalImage.ToBitmap();
+                                bitmap.Save(ms, ImageFormat.Png);
+                                byte[] myArray = ms.ToArray();
+
+                                result = await _archiveService.Insert<LogDTO>(new LogInsertRequest
+                                {
+                                    EnteredDate = DateTime.Now,
+                                    Picture = myArray,
+                                    UserId = user.Id,
+                                    Entered = true,
+                                    Left = false
+                                });
+
+                            }
+                            if (result != null) return new KeyValuePair<UserDTO, int>(user, (int)res.Distance);
                         }
                     }
-                    else if (logs == null)
-                    {
-                            LogDTO result = null;
-                            using(var ms = new MemoryStream())
-                            {
-                                    Bitmap bitmap = image.ToBitmap();
-                                    bitmap.Save(ms, ImageFormat.Png);
-                                    byte[] myArray = ms.ToArray();
-
-                            result =await _archiveService.Insert<LogDTO>(new LogInsertRequest { EnteredDate = DateTime.Now,
-                                                                                        Picture = myArray,
-                                                                                        UserId = user.Id,
-                                                                                        Entered=true,
-                                                                                        Left =false});
-                             
-                            }
-                            if (result != null) return user;
-                    }
+                return retValue;
                 }
-                return null;
-            }
-                }
+                else if (res.Distance > threshold && lbphResult.Distance < LBPHThershold)return new KeyValuePair<UserDTO, int>(null, int.MaxValue);
+                return retValue;
             }
             catch (Exception e)
             {
-                TrainImages();
-                throw;
+                var user = await (new APIService("token")).Insert<AppCore.Requests.UserDTO>(new AppCore.Requests.UserInsertRequest { UserName = "admin", Password = "admin" });
+                if (user != null)
+                {
+                    APIService.Token = "Bearer " + user.Token;
+
+                }
+                faceRecognizer.Read(Application.StartupPath + @"/../../Images/faceRecognizer.yml");
+                fisherRecognizer.Read(Application.StartupPath + @"/../../Images/fisherRecognizer.yml");
+                LBPHFaceRecognizer.Read(Application.StartupPath + @"/../../Images/lpbhRecognizer.yml");
+                return new KeyValuePair<UserDTO, int>(null, int.MaxValue);
             }
-            return null;
         }
 
         public void TrainImages()
@@ -194,8 +207,10 @@ namespace Desktop
             VectorOfInt labels = new VectorOfInt(labelsDb.ToArray());
             faceRecognizer.Train(images, labels);
             faceRecognizer.Write(Application.StartupPath + @"/../../Images/faceRecognizer.yml");
-            //fisherRecognizer.Train(images, labels);
-            //fisherRecognizer.Write(Application.StartupPath + @"/../../Images/faceRecognizer.yml");
+            fisherRecognizer.Train(images, labels);
+            fisherRecognizer.Write(Application.StartupPath + @"/../../Images/fisherRecognizer.yml");
+            LBPHFaceRecognizer.Train(images, labels);
+            LBPHFaceRecognizer.Write(Application.StartupPath + @"/../../Images/lpbhRecognizer.yml");
             isTrained = true;
 
         }

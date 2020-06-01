@@ -9,3 +9,6 @@
 .myTable th{
     text-align:center;
 }
+td>img{
+    border-radius:25px;
+}

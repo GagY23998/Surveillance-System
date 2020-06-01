@@ -53,6 +53,10 @@ namespace reactApp.Controllers {
         {
             var searchRequest = MyMapper.Map<UserSearchRequest>(request);
             var user = _context.Users.FirstOrDefault(_ => _.UserName == request.UserName);
+            if (user == null)
+            {
+                return null;
+            }
             var password = GenerateHash(user.PasswordSalt, request.Password);
            
             
@@ -71,7 +75,7 @@ namespace reactApp.Controllers {
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
                 var signInCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-                var token = new JwtSecurityToken(_configuration["Jwt:Issuer"], audience: _configuration["Jwt:Audience"], claims.ToArray(), expires: DateTime.Now.AddMinutes(5),signingCredentials:signInCredentials);
+                var token = new JwtSecurityToken(_configuration["Jwt:Issuer"], audience: _configuration["Jwt:Audience"], claims.ToArray(), expires: DateTime.Now.AddMinutes(10),signingCredentials:signInCredentials);
                 var writeToken= new JwtSecurityTokenHandler().WriteToken(token);
                 user.Token = writeToken;
                 _context.Users.Update(user);

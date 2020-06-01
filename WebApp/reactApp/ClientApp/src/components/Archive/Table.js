@@ -1,9 +1,8 @@
 ﻿import React, {useState, useEffect } from "react";
 import "./Table.css";
 
-const Table = ({ headers, tableData }) => {
+const Table = ({ headers, tableData,showModal }) => {
 
-    const [dataArray, setDataArray] = useState(tableData);
     const dateOptions = {
         year: "numeric",
         month: "numeric",
@@ -11,11 +10,6 @@ const Table = ({ headers, tableData }) => {
         hour: "numeric",
         minute:"numeric"
     };
-
-    useEffect(() => {
-        setDataArray(tableData);
-    }, [tableData]);
-
 
     const convertImage = (picture) => {
         console.log(picture);
@@ -28,38 +22,39 @@ const Table = ({ headers, tableData }) => {
         return result;
     }
 
-    const showImage = (e) => {
-        console.log(e.target);
-        e.target.width = "200px";
-        e.target.height = "200px";
-    }
-    const closeImage = (e) => {
-        e.target.width = "20px";
-        e.target.height = "20px";
-    }
+ 
+    const data = (
+        <table className="table table-striped myTable" style={{ overflowY: "auto" }}>
+        <thead className="thead-light" style={{textAlign:"center"}}><tr><th colSpan="4">{headers}</th></tr>
+        <tr>
+            <th>Picture</th>
+            <th>User</th>
+            <th>Entered</th>
+            <th>Left</th>
+        </tr>
+        </thead>
+        <tbody style={{textAlign: "center", overflow: "scroll" }}>
+            {(tableData && tableData.length > 0) ? tableData.map((el, index) =>
+                <tr key={index}>
+                    <td><img onClick={showModal?()=>showModal(el):null} src={"data:image/png;base64, "+ el.picture} height="50px" width="50px" /></td>
+                    <td>{el.user===null? <p>Visitor</p> : <p>{el.user.firstName + " " + el.user.lastName}</p>}</td>
+
+                    {el.user === null ?
+                        (<td colSpan="2">{new Date(el.enteredDate).toLocaleTimeString("de-DE", dateOptions)}</td>)
+                        :
+                        (<React.Fragment>
+                            <td>{(el.enteredDate) ? new Date(el.enteredDate).toLocaleTimeString("de-DE", dateOptions) : "NO"}</td>
+                            <td>{(el.leftDate) ? new Date(el.leftDate).toLocaleTimeString("de-DE", dateOptions) : "NO"}</td>
+                        </React.Fragment>)
+                     }
+                </tr>
+            ) : null}
+        </tbody></table>);
 
     return (
         <React.Fragment>
-            <div>
-                <table className="table table-striped myTable">
-                    <thead className="thead-light">
-                        {(headers) ? <tr><th colSpan="3">{headers}</th></tr>:null}
-                        <tr>
-                            <th>User</th>
-                            <th>Entered</th>
-                            <th>Left</th>
-                        </tr>
-                    </thead>
-                    <tbody style={{ textAlign: "center" ,overflow:"scroll"}}> 
-                        {(dataArray && dataArray.length > 0) ? dataArray.map((el, index) => 
-                            <tr key={index}>
-                                <td>{el.user.firstName + ' ' + el.user.lastName}</td>
-                                <td>{(el.enteredDate) ? new Date(el.enteredDate).toLocaleTimeString("de-DE",dateOptions) : "NO"}</td>
-                                <td>{(el.leftDate) ? new Date(el.leftDate).toLocaleTimeString("de-DE",dateOptions) : "NO"}</td>
-                            </tr>
-                        ):null}
-                    </tbody>
-                </table>
+            <div style={{height:"90%",overflowY:"scroll"}}>
+                {data}
             </div>
         </React.Fragment>);
 
