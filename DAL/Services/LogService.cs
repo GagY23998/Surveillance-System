@@ -37,11 +37,11 @@ namespace DAL.Services
 
             if (searchRequest.UserId == 0)
             {
-                if (!string.IsNullOrEmpty(searchRequest.FirstName) || !string.IsNullOrEmpty(searchRequest.LastName))
-                {
-                    query = query.Where(_ => (_.User.FirstName == searchRequest.FirstName || _.User.LastName == searchRequest.LastName) && _.UserId.HasValue);
-                }
-
+                if (!string.IsNullOrEmpty(searchRequest.FirstName))
+                    query = query.Where(_ => _.User.FirstName == searchRequest.FirstName && _.UserId.HasValue);
+                
+                if(!string.IsNullOrEmpty(searchRequest.LastName))
+                    query = query.Where(_ =>_.User.LastName == searchRequest.LastName && _.UserId.HasValue); 
             }
             else
             {

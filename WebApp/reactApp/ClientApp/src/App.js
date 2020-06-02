@@ -20,7 +20,8 @@ const App = (props)=> {
             setToken(localStorage["token"]);
         }
         return () => { console.log("Cleaning storage"); localStorage.clear(); };
-    },[]);
+    }, []);
+    const history = useHistory();
 
     const signIn = (e) => {
         e.preventDefault();
@@ -32,6 +33,7 @@ const App = (props)=> {
             "content-type": "application/json; charset=utf-8",
             "Accept": "application/json"
         };
+
         AuthService.post("/token",
             null,
             {
@@ -43,7 +45,8 @@ const App = (props)=> {
                 let result = data.data.userRoles.reduce((prevVal,element)=>prevVal+element.role.name+",","");
                 console.log(result);
                 localStorage.setItem("roles", result);
-                props.history.push("/");
+//                props.history.push("/");
+                history.goBack();
             }).catch(err => {
                 localStorage.clear();
             });
