@@ -38,7 +38,7 @@ namespace reactApp
 
             services.AddCors();
             services.AddControllersWithViews();
-            services.AddDbContext<AppDbContext>(config => config.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Blogging;Trusted_Connection=True;"));
+            services.AddDbContext<AppDbContext>(config => config.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Surveillance;Trusted_Connection=True;"));
 
             var mappingConfig = new MapperConfiguration(mc =>
             {
@@ -72,7 +72,8 @@ namespace reactApp
                     ValidAudience = Configuration["Jwt:Audience"],
                     ValidateIssuer = false,
                     ValidateAudience = false,
-                    RequireExpirationTime = true
+                    RequireExpirationTime = true,
+                    ClockSkew = TimeSpan.FromSeconds(10)
                 };
             });
             services.AddAuthorization(config =>

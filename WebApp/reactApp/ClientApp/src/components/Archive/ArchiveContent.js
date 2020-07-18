@@ -1,6 +1,7 @@
 ﻿import React, { useState,useEffect } from "react";
 import { withRouter } from "react-router-dom";
 import AxiosInstance from "./../../services/AuthService";
+import "./ArchiveContent.css";
 import Filter from "./Filter";
 import Table from "./Table";
 import Modal from "../Modal/Modal";
@@ -43,17 +44,19 @@ const ArchiveContent = (props) => {
             }
             }).then(data => setData(data.data)).catch(err => {
                 localStorage.clear();
+                localStorage.setItem("history", props.history.location.pathname);
+                console.log(localStorage.getItem("history"));
                 props.history.push("/signin");
             });
     }   
     const roles = localStorage["roles"].split(",").findIndex(el => el === "Admin") === -1 ? null : "Admin";
     console.log(roles);
     return (
-        <div style={{ height: "95%", position: "relative" }}>
+        <div style={{ height: "100%", position: "relative" }}>
             <Modal onClose={closeModalHandler} info={modalData} />
             {(roles === "Admin") ?
             (<React.Fragment><Filter searchArchiveHandler={searchArchiveHandler} />
-                    <Table showModal={showModalData} tableData={data} /></React.Fragment>) : <p style={{fontWeight:"bold",position:"absolute",margin:"0",top:"50%",left:"50%",transform:"translate(-50%,-100%)"}}>You have no permission</p>
+                    <Table showModal={showModalData} headers="Archive" tableData={data} /></React.Fragment>) : <p style={{fontWeight:"bold",position:"absolute",margin:"0",top:"50%",left:"50%",transform:"translate(-50%,-100%)"}}>You have no permission</p>
                 }
         </div> 
     );

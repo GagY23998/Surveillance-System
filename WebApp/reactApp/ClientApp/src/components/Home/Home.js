@@ -1,58 +1,105 @@
-import React, { useState,useEffect } from "react";
+import React, { useState,useEffect, useRef } from "react";
 import "./Home.css";
 import AxiosInstance from "../../services/AuthService";
-import axios from "axios";
-import * as signalR from "@aspnet/signalr";
+import { HubConnectionBuilder,LogLevel } from "@aspnet/signalr";
 import Table from "../Archive/Table";
 import Modal from "../Modal/Modal";
-
+import Spinner from "../Helper/Spinner";
 const Home = (props) => {
 
-    const [visits, setVisits] = useState({
-        visitsToday: [],
-        visitsMonth: []        
-    });
+    //const [visits, setVisits] = useState({
+    //    visitsToday: [],
+    //    visitsMonth: []        
+    //});
+
+    const [visitsToday, setVisitsToday] = useState([]);
+    const [visitsMonth, setVisitsMonth] = useState([]);
+
+    //useEffect(() => {
+    //    localStorage.setItem("history", history.location.pathname);
+    //}, []);
     const [modalData, setModalData] = useState(null);
-
+    const isMounted = useRef(false);
+    const monthMounted = useRef(false);
+    const entrieMounted = useRef(false);
+    const entries = useRef([]);
+    const [hubConnection, setHubConnection] = useState(null);
     const [currentEntry, setCurrentEntry] = useState([]);
-    useEffect(() => {
-        const myHubConnection = new signalR.HubConnectionBuilder()
-            .withUrl("/archivehub")
-            .configureLogging(signalR.LogLevel.Information)
-            .build();
-        myHubConnection.serverTimeoutInMilliseconds = 100000;
-
-        myHubConnection.start(() => console.log("WebSocket started")).catch(err => console.log(err));
-         
-        myHubConnection.on("RecieveMessage", (data) => {
-            console.log(data);
-            if (data.user) {
-                setCurrentEntry(()=>[...currentEntry,data]);
-            }
-            
-        });
-        myHubConnection.on("UpdateMessage", (data) => {
-            if (data.user) {
-                setCurrentEntry(currentEntry.filter(element => element.userId !== data.userId));
-            }
-        });
-        return () => myHubConnection.stop();
-    }, [currentEntry]);
     
+
     useEffect(() => {
-        if (localStorage["token"]) {
-            AxiosInstance.get("/archive/currentEntries", { headers: { "authorization": "Bearer " + localStorage["token"] } })
-            .then((data) => setCurrentEntry(data.data)).catch(err => props.history.push("/signin"));
+        if (!isMounted.current) {
+            console.log("Fetching data starting");
+            AxiosInstance.get("/archive/visitstoday", { headers: { "authorization": "Bearer " + localStorage["token"] } })
+                .then(data => {
+                    console.log(data.data);
+                    setVisitsToday([...data.data]);
+                }).catch(err => {
+                    localStorage.setItem("history", props.history.location.pathname);
+                    props.history.push("/signin");
+                });
         }
-    //    return () => setVisits({ visitsMonth: [], visitsToday: [] });
+        return () => { isMounted.current = true; };
+    },[]);
+
+    useEffect(() => {
+        if (!monthMounted.current) {
+        AxiosInstance.get("/archive/visitsMonth", { headers: { "authorization": "Bearer " + localStorage["token"] } })
+            .then(data => {
+                console.log(data.data);
+                setVisitsMonth([...data.data]);
+            }).catch(err => {
+                localStorage.setItem("history", props.history.location.pathname);
+                props.history.push("/signin");
+            });
+        }
+        return () => { monthMounted.current = true; };
+    },[]);
+
+    useEffect(() => {
+
+            const myHubConnection = new HubConnectionBuilder()
+                .withUrl("/archivehub")
+                .configureLogging(LogLevel.Information)
+                .build();
+            myHubConnection.serverTimeoutInMilliseconds = 100000;
+
+            myHubConnection.start(() => console.log("WebSocket started")).catch(err => console.log(err));
+
+                console.log("Adding events to hub");
+                myHubConnection.on("RecieveMessage", (data) => {
+                    console.log(data);
+                    if (data.user) {
+                        entries.current = [...entries.current, data];
+                        setCurrentEntry([...entries.current]);
+                    }
+
+                });
+                myHubConnection.on("UpdateMessage", (data) => {
+                    if (data.user) {
+                        entries.current = [...entries.current.filter(element => element.userId !== data.userId)];
+                        setCurrentEntry(entries.current);
+                    }
+                });
+        return () => setHubConnection(myHubConnection);
     }, []);
 
     useEffect(() => {
-        if (localStorage["token"]) {
-            AxiosInstance.get("/archive/visits", { headers: { "authorization": "Bearer " + localStorage["token"] } })
-                .then(data => setVisits(data.data)).catch(err => props.history.push("/signin"));
+        if (!entrieMounted.current) {
+            AxiosInstance.get("/archive/currentEntries", { headers: { "authorization": "Bearer " + localStorage["token"] } })
+                .then((data) => {
+                    entries.current = [...data.data];
+                    setCurrentEntry([...entries.current]);
+                }).catch(err => {
+                    if (props.history.location.pathname !== "/signin") {
+                        localStorage.setItem("history", props.history.location.pathname);
+                        props.history.push("/signin");
+                    }
+                });
         }
-    }, []);
+        return () => { entrieMounted.current = true; };
+    //    return () => setVisits({ visitsMonth: [], visitsToday: [] });
+    },[]);
 
 
     const showModalData = (info) => {
@@ -69,10 +116,10 @@ const Home = (props) => {
             <Modal onClose={closeModalHandler} info={modalData} />
             <div className="myGrid">
                 <div style={{ overflowY: "auto" }}>
-                    <Table showModal={showModalData} headers="Today Visits" guests={true} tableData={visits.visitsToday} />
+                    {visitsToday ?<Table showModal={showModalData} headers="Today Visits" guests={true} tableData={visitsToday} />:<Spinner/>}
                 </div>
                 <div style={{ overflowY: "auto" }}>
-                    <Table showModal={showModalData} headers="Monthly Visits" tableData={visits.visitsMonth} />
+                    {visitsMonth ? <Table showModal={showModalData} headers="Monthly Visits" tableData={visitsMonth} /> : <Spinner />}
                 </div>
                 <div style={{ gridColumn: "1 / span 2" }}>
                     <Table showModal={showModalData} headers="In Building" tableData={currentEntry} />

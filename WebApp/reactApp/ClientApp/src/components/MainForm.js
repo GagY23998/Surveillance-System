@@ -1,7 +1,6 @@
 ﻿import React, { useEffect } from 'react';
 import { Route,Switch,withRouter,Redirect } from "react-router-dom";
 import Header from "../containers/Header/Header";
-import AuthRoute from '../hoc/AuthRoute';
 import ArchiveContent from "./../components/Archive/ArchiveContent";
 import Home from './Home/Home';
 const MainForm = (props) => {
@@ -19,7 +18,7 @@ const MainForm = (props) => {
         <Switch>
             <Route path="/archives" component={ArchiveContent} />
             <Route path="/" component={Home} />
-                </Switch>
+        </Switch>
                 </React.Fragment>)
         :<Redirect to="/signin" />}
         </React.Fragment>);

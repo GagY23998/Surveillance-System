@@ -26,7 +26,6 @@ namespace reactApp.Controllers
     {
         public List<LogDTO> visitsToday { get; set; }
         public List<LogDTO> visitsMonth { get; set; }
-        public int TotalVisits { get; set; }
     }
     
     [Authorize(Roles="Admin,User")]
@@ -62,30 +61,40 @@ namespace reactApp.Controllers
             return res;
         }
         [Authorize(Roles="Admin,User")]
-        [HttpGet("visits")]
-        public VisitsDTO Visits() 
+        [HttpGet("visitstoday")]
+        public List<LogDTO> VisitsToday() 
         {
             var Date = DateTime.Now;
             var zeroHours = Date.AddHours(-Date.Hour).AddMinutes(-Date.Minute).AddSeconds(-Date.Second);
             var lastHour = Date.AddHours(-Date.Hour+24).AddMinutes(-Date.Minute).AddSeconds(-Date.Second);
          
+            //var firstDate = DateTime.Now.AddDays(-DateTime.Now.Day).AddHours(-DateTime.Now.Hour).AddMinutes(-DateTime.Now.Minute).AddSeconds(-DateTime.Now.Second).AddDays(1);
+            //var lastDate = firstDate.AddDays(DateTime.DaysInMonth(firstDate.Year, firstDate.Month)).AddDays(-1);
+
+            var visitsToday = Service.Get(new LogSearchRequest { FromDate = zeroHours, ToDate = lastHour});
+            //var visitsToday = Service.Get(new LogSearchRequest { FromDate = zeroHours, ToDate = lastHour});
+            //var visitsMonth = Service.Get(new LogSearchRequest { FromDate =firstDate ,ToDate = lastDate});
+
+            //var visitInfo = new VisitsDTO
+            //{
+            //    visitsToday = visitsToday,
+            //    visitsMonth = visitsMonth
+            //};
+
+            //return visitInfo;        
+            return visitsToday;
+        }
+
+        [Authorize(Roles = "Admin,User")]
+        [HttpGet("visitsmonth")]
+        public List<LogDTO> VisitsMonth()
+        {
             var firstDate = DateTime.Now.AddDays(-DateTime.Now.Day).AddHours(-DateTime.Now.Hour).AddMinutes(-DateTime.Now.Minute).AddSeconds(-DateTime.Now.Second).AddDays(1);
             var lastDate = firstDate.AddDays(DateTime.DaysInMonth(firstDate.Year, firstDate.Month)).AddDays(-1);
 
-            var visitsToday = Service.Get(new LogSearchRequest { FromDate = zeroHours, ToDate = lastHour});
             var visitsMonth = Service.Get(new LogSearchRequest { FromDate =firstDate ,ToDate = lastDate});
 
-            
-
-
-            var visitInfo = new VisitsDTO
-            {
-                visitsToday = visitsToday,
-                visitsMonth = visitsMonth,
-                TotalVisits = Service.Get(null).Count()
-            };
-
-            return visitInfo;        
+            return visitsMonth;
         }
 
         [Authorize(Roles="Admin,User")]

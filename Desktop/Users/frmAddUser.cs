@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -22,8 +23,8 @@ namespace Desktop.Users
         private APIService _labelService = new APIService("label");
         private APIService _userRoleService = new APIService("userrole");
         private APIService _roleService = new APIService("role");
-        const int minNeighbours = 5;
-        const double scaleSize = 1.05;
+        const int minNeighbours = 3;
+        const double scaleSize = 1.1;
         int? _id = null;
         private CascadeClassifier classifier = new CascadeClassifier(@"../../Assets/haarcascade_frontalface_alt.xml");
         private FaceRecognitionDB faceRecognition = new FaceRecognitionDB();
@@ -166,8 +167,20 @@ namespace Desktop.Users
                 Program.camExit = new VideoCapture(2);
                 Program.camEnter.ImageGrabbed += Program.CamEnter_ImageGrabbed;
                 Program.camExit.ImageGrabbed += Program.CamExit_ImageGrabbed;
+                Program.faceRecognition = new FaceRecognitionDB();
                 Program.camEnter.Start();
                 Program.camExit.Start();
+
+
+                var labels = await _labelService.Get<List<LabelDTO>>(new LabelSearchRequest { UserId = _id.Value });
+                UserDTO user = await _userService.GetById<UserDTO>(_id.Value);
+                string userString = user.FirstName + "-" + user.LastName;
+                string pathToDirectory = Application.StartupPath + @"/../../Images/" + userString;
+
+
+                Process.Start(pathToDirectory);
+
+
             }
             else
             {
@@ -201,15 +214,73 @@ namespace Desktop.Users
             string userString = user.FirstName + "-" + user.LastName;
 
             string pathToDirectory = Application.StartupPath + @"/../../Images/" + userString;
-            foreach( string file in Directory.GetFiles(pathToDirectory, "*.*"))
+
+            if (Directory.Exists(pathToDirectory))
             {
-                File.Delete(file);
+                try
+                {
+
+                foreach( string file in Directory.GetFiles(pathToDirectory, "*.*"))
+                {
+                    File.Delete(file);
+                }
+                Directory.Delete(pathToDirectory);
+                string trainingFiles = Path.GetFullPath(Application.StartupPath + @"\..\..\Images\");
+                string[] trainImages = Directory.GetFiles(trainingFiles,"*.yml");
+                    if (trainImages.Count() == 3)
+                    {
+                        foreach (var item in trainImages)
+                        {
+                            File.Delete(item);
+                        }
+                        var files = Directory.GetDirectories(trainingFiles);
+                        if (files.Count() != 0)
+                        {
+                            faceRecognition.TrainImages();
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+
+                }
+                if (!Directory.Exists(pathToDirectory))
+                {
+                    MessageBox.Show("Successufully removed images", "Info", MessageBoxButtons.OK);
+                }
             }
-            Directory.Delete(pathToDirectory);
-            if (!Directory.Exists(pathToDirectory))
+            else
             {
-                MessageBox.Show("Successufully removed images", "Info", MessageBoxButtons.OK);
+                MessageBox.Show("There's no data to be removed", "Info", MessageBoxButtons.OK);
             }
         }
+
+        private async void btn_updateUser_Click(object sender, EventArgs e)
+        {
+            if (_id.HasValue && !string.IsNullOrEmpty(txtBox_Password.Text) && !string.IsNullOrEmpty(txtBox_Confirm.Text))
+            {
+                RoleDTO role = (await _roleService.Get<List<RoleDTO>>(null)).FirstOrDefault(_ => _.Name == "User");
+
+                var updateRes = new UserInsertRequest
+                {
+                    UserName = txtBox_UserName.Text,
+                    FirstName = txtBox_FirstName.Text,
+                    LastName = txtBox_LastName.Text,
+                    Password = txtBox_Password.Text,
+                    PasswordConfirmation = txtBox_Confirm.Text,
+                    Roles = new List<RoleDTO> { role }
+                };
+                var result = await _userService.Update<UserDTO>(_id.Value, updateRes);
+                if (result != null)
+                {
+                    MessageBox.Show("User successfully changed", "Info", MessageBoxButtons.OK);
+                }
+                else
+                {
+                    MessageBox.Show("User could not be changed", "Info", MessageBoxButtons.OK);
+                }
+
+            }
+        }
+        }
     }
-}

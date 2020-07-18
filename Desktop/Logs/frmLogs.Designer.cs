@@ -79,6 +79,7 @@
             this.dgv_Logs.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.dgv_Logs.Size = new System.Drawing.Size(704, 299);
             this.dgv_Logs.TabIndex = 1;
+            this.dgv_Logs.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgv_Logs_CellMouseDoubleClick);
             // 
             // txtBox_LastName
             // 
@@ -224,7 +225,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(24)))), ((int)(((byte)(163)))), ((int)(((byte)(138)))));
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(24)))), ((int)(((byte)(163)))), ((int)(((byte)(148)))));
             this.ClientSize = new System.Drawing.Size(800, 488);
             this.Controls.Add(this.btnReset);
             this.Controls.Add(this.btnSearch);

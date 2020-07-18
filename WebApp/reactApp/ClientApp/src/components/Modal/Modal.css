@@ -75,4 +75,9 @@
         transform:translateX(0);
         width:100%;
     }
+    button{
+        position:relative;
+        top:100%;
+        left:5%;
+    }
 }

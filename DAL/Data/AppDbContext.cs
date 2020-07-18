@@ -46,7 +46,7 @@ namespace DAL.Data
             base.OnModelCreating(modelBuilder);
 
             var adminSalt = GenerateSalt();
-
+            modelBuilder.Entity<Log>().HasIndex(log => new { log.EnteredDate, log.LeftDate }).IsClustered(false).HasName("Date_Range");
             modelBuilder.Entity<UserRole>().HasKey(key => new {key.UserId,key.RoleId });
             modelBuilder.Entity<User>().HasData(new User
             {   Id = 1,

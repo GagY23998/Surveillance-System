@@ -3,6 +3,9 @@ import "./Table.css";
 
 const Table = ({ headers, tableData,showModal }) => {
 
+
+  
+
     const dateOptions = {
         year: "numeric",
         month: "numeric",
@@ -33,7 +36,7 @@ const Table = ({ headers, tableData,showModal }) => {
             <th>Left</th>
         </tr>
         </thead>
-        <tbody style={{textAlign: "center", overflow: "scroll" }}>
+        <tbody style={{textAlign: "center", overflow: "auto" }}>
             {(tableData && tableData.length > 0) ? tableData.map((el, index) =>
                 <tr key={index}>
                     <td><img onClick={showModal?()=>showModal(el):null} src={"data:image/png;base64, "+ el.picture} height="50px" width="50px" /></td>
@@ -42,18 +45,18 @@ const Table = ({ headers, tableData,showModal }) => {
                     {el.user === null ?
                         (<td colSpan="2">{new Date(el.enteredDate).toLocaleTimeString("de-DE", dateOptions)}</td>)
                         :
-                        (<React.Fragment>
+                        (<>
                             <td>{(el.enteredDate) ? new Date(el.enteredDate).toLocaleTimeString("de-DE", dateOptions) : "NO"}</td>
                             <td>{(el.leftDate) ? new Date(el.leftDate).toLocaleTimeString("de-DE", dateOptions) : "NO"}</td>
-                        </React.Fragment>)
+                        </>)
                      }
                 </tr>
             ) : null}
         </tbody></table>);
 
     return (
-        <React.Fragment>
-            <div style={{height:"90%",overflowY:"scroll"}}>
+       <React.Fragment>
+            <div style={{height:"100%",overflowY:"scroll"}}>
                 {data}
             </div>
         </React.Fragment>);

@@ -13,6 +13,6 @@ namespace AppCore.Models
         public User User { get; set; }
         public bool Entered { get; set; }
         public bool Left { get; set; }
-        public byte[] Picture { get; set; }
+        public string Picture { get; set; }
     }
 }

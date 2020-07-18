@@ -50,9 +50,9 @@ namespace DAL.Services
             if ((searchRequest.FromDate == new DateTime(1,1,1,1,0,0) || searchRequest.FromDate == default(DateTime) ) ||
                 (searchRequest.ToDate == new DateTime(1,1,1,1,0,0) || searchRequest.ToDate == default(DateTime)))
             {
-                query = query.Where(_ => (_.EnteredDate.HasValue && (_.EnteredDate >= DateTime.MinValue && _.EnteredDate <= DateTime.MaxValue)) ||
-                         (_.LeftDate.HasValue && (_.LeftDate >= DateTime.MinValue && _.LeftDate <= DateTime.MaxValue)));
-
+                //query = query.Where(_ => (_.EnteredDate.HasValue && (_.EnteredDate >= DateTime.MinValue && _.EnteredDate <= DateTime.MaxValue)) ||
+                //         (_.LeftDate.HasValue && (_.LeftDate >= DateTime.MinValue && _.LeftDate <= DateTime.MaxValue)));
+                query = query.Where(_ => (_.EnteredDate.HasValue && (_.EnteredDate >= DateTime.MinValue && _.EnteredDate <= DateTime.MaxValue)));
             }
             else
             {

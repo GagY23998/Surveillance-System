@@ -45,6 +45,7 @@
             this.txtBox_UserName = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.btn_Delete = new System.Windows.Forms.Button();
+            this.btn_updateUser = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.imgBox_UserFace)).BeginInit();
             this.SuspendLayout();
             // 
@@ -55,9 +56,9 @@
             this.btnUsers.ForeColor = System.Drawing.Color.White;
             this.btnUsers.Location = new System.Drawing.Point(202, 455);
             this.btnUsers.Name = "btnUsers";
-            this.btnUsers.Size = new System.Drawing.Size(155, 37);
+            this.btnUsers.Size = new System.Drawing.Size(128, 37);
             this.btnUsers.TabIndex = 1;
-            this.btnUsers.Text = "Add User";
+            this.btnUsers.Text = "Add";
             this.btnUsers.UseVisualStyleBackColor = false;
             this.btnUsers.Click += new System.EventHandler(this.btnUsers_Click);
             // 
@@ -66,9 +67,9 @@
             this.btnReset.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(83)))), ((int)(((byte)(83)))));
             this.btnReset.Font = new System.Drawing.Font("Raleway Medium", 18F);
             this.btnReset.ForeColor = System.Drawing.Color.White;
-            this.btnReset.Location = new System.Drawing.Point(435, 455);
+            this.btnReset.Location = new System.Drawing.Point(471, 455);
             this.btnReset.Name = "btnReset";
-            this.btnReset.Size = new System.Drawing.Size(155, 37);
+            this.btnReset.Size = new System.Drawing.Size(119, 37);
             this.btnReset.TabIndex = 2;
             this.btnReset.Text = "Reset";
             this.btnReset.UseVisualStyleBackColor = false;
@@ -227,12 +228,26 @@
             this.btn_Delete.UseVisualStyleBackColor = false;
             this.btn_Delete.Click += new System.EventHandler(this.btn_Delete_Click);
             // 
+            // btn_updateUser
+            // 
+            this.btn_updateUser.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(83)))), ((int)(((byte)(83)))));
+            this.btn_updateUser.Font = new System.Drawing.Font("Raleway Medium", 18F);
+            this.btn_updateUser.ForeColor = System.Drawing.Color.White;
+            this.btn_updateUser.Location = new System.Drawing.Point(337, 455);
+            this.btn_updateUser.Name = "btn_updateUser";
+            this.btn_updateUser.Size = new System.Drawing.Size(128, 37);
+            this.btn_updateUser.TabIndex = 16;
+            this.btn_updateUser.Text = "Update";
+            this.btn_updateUser.UseVisualStyleBackColor = false;
+            this.btn_updateUser.Click += new System.EventHandler(this.btn_updateUser_Click);
+            // 
             // frmAddUser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(24)))), ((int)(((byte)(163)))), ((int)(((byte)(148)))));
             this.ClientSize = new System.Drawing.Size(800, 581);
+            this.Controls.Add(this.btn_updateUser);
             this.Controls.Add(this.btn_Delete);
             this.Controls.Add(this.txtBox_UserName);
             this.Controls.Add(this.label6);
@@ -277,5 +292,6 @@
         private System.Windows.Forms.TextBox txtBox_UserName;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button btn_Delete;
+        private System.Windows.Forms.Button btn_updateUser;
     }
 }

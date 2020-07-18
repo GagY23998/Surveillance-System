@@ -24,10 +24,10 @@ namespace Desktop.Users
         {
             try
             {
-                if (this.Controls.OfType<TextBox>().Any(txtBox => string.IsNullOrEmpty(txtBox.Text))){
-                    MessageBox.Show("Fields can't be empty","Info",MessageBoxButtons.OK);
-                    return;
-                }
+                //if (this.Controls.OfType<TextBox>().Any(txtBox => string.IsNullOrEmpty(txtBox.Text))){
+                //    MessageBox.Show("Fields can't be empty","Info",MessageBoxButtons.OK);
+                //    return;
+                //}
 
                 var users = await _userService.Get<List<UserDTO>>(new UserSearchRequest { FirstName = txtBox_FirstName.Text,LastName = txtBox_LastName.Text});
 
@@ -72,16 +72,27 @@ namespace Desktop.Users
 
         private void dgv_Users_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            var value = dgv_Users.SelectedRows[0].Cells[0].Value;
-            frmAddUser frm = new frmAddUser(int.Parse(value.ToString()))
+            try
             {
-                AutoScroll = false,
-                TopLevel = false,
-                WindowState = FormWindowState.Maximized
-            };
-            this.Parent.Controls.Add(frm);
-            frm.Show();
-            this.Parent.Controls.Remove(this);
+                var value = dgv_Users.SelectedRows[0].Cells[0].Value;
+                int index = int.Parse(value.ToString());
+                if (index > 0)
+                {
+                    frmAddUser frm = new frmAddUser(index)
+                    {
+                        AutoScroll = false,
+                        TopLevel = false,
+                        WindowState = FormWindowState.Maximized
+                    };
+                    this.Parent.Controls.Add(frm);
+                    frm.Show();
+                    this.Parent.Controls.Remove(this);
+                }
+
+            }
+            catch (Exception)
+            {
+            }
         }
     }
 }

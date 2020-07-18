@@ -22,7 +22,7 @@ const Modal = ({ info, onClose }) => {
                 </div>
                     <div className="divInfo">
                         <p className="left">Left:</p>
-                        <p className="right">{new Date(info.leftDate).toLocaleTimeString("de-DE", dateOptions)}</p>
+                        <p className="right">{info.left ? new Date(info.leftDate).toLocaleTimeString("de-DE", dateOptions):"NO"}</p>
                     </div>
                     <div className="divInfo">
                         <button type="button" onClick={onClose}>Close</button>

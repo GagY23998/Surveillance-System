@@ -215,6 +215,12 @@
     <Compile Include="Logs\frmLogs.Designer.cs">
       <DependentUpon>frmLogs.cs</DependentUpon>
     </Compile>
+    <Compile Include="Logs\frmLogDetails.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Logs\frmLogDetails.Designer.cs">
+      <DependentUpon>frmLogDetails.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -241,6 +247,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Logs\frmLogs.resx">
       <DependentUpon>frmLogs.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Logs\frmLogDetails.resx">
+      <DependentUpon>frmLogDetails.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>

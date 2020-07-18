@@ -37,11 +37,11 @@ namespace Desktop.Logs
 
         private async void btnSearch_Click(object sender, EventArgs e)
         {
-            var txtBoxes = this.Controls.OfType<TextBox>().ToArray();
-            if (txtBoxes.All(txt => string.IsNullOrEmpty(txt.Text))){
-                MessageBox.Show("Fields can't be empty");
-                return;
-            }
+           // var txtBoxes = this.Controls.OfType<TextBox>().ToArray();
+           //if (txtBoxes.All(txt => (txt.Name!="txtBox_FirstName" || txt.Name != "txtBox_LastName") && string.IsNullOrEmpty(txt.Text))){
+           //     MessageBox.Show("Fields can't be empty");
+           //     return;
+           // }
 
             DateTime fromDateResult = default;
             DateTime toDateResult = default;
@@ -65,9 +65,35 @@ namespace Desktop.Logs
                 dgv_Logs.Columns[3].Visible = false;
                 dgv_Logs.Columns[4].Visible = false;
                 dgv_Logs.Columns[7].Visible = false;
-                dgv_Logs.Columns[8].Visible = false;
             }
 
+        }
+
+        private void dgv_Logs_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            try
+            {
+                var value = dgv_Logs.SelectedRows[0].Cells[0].Value;
+                int index = int.Parse(value.ToString());
+
+                if (index > 0)
+                {
+                    frmLogDetails frmLogDetails = new frmLogDetails(this, index)
+                    {
+                        WindowState = FormWindowState.Maximized,
+                        AutoScroll = false,
+                        TopLevel= false,
+                        StartPosition = FormStartPosition.CenterParent
+                    };
+                    this.Parent.Controls.Add(frmLogDetails);
+                    frmLogDetails.Show();
+                    this.Hide();
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
     }
 }

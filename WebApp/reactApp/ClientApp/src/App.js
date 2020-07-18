@@ -1,12 +1,9 @@
 import React, { useState,useEffect,useContext } from 'react';
-import Header from "./containers/Header/Header";
 import { Route, Switch,Redirect,withRouter,useHistory } from "react-router-dom";
 import MainForm from "./components/MainForm";
 import './custom.css'
 import AuthService from "./services/AuthService";
-import AuthRoute from './hoc/AuthRoute';
 import SignIn from "./components/Authentication/SignIn";
-import UserContext from './context/UserContext';
 
 
 
@@ -33,36 +30,43 @@ const App = (props)=> {
             "content-type": "application/json; charset=utf-8",
             "Accept": "application/json"
         };
+        if (signInData.UserName && signInData.Password) {
 
-        AuthService.post("/token",
-            null,
-            {
-                data: signInData,
-                headers: configHeaders
-            }).then(data => {
-                console.log(data);
-                localStorage.setItem("token", data.data.token);
-                let result = data.data.userRoles.reduce((prevVal,element)=>prevVal+element.role.name+",","");
-                console.log(result);
-                localStorage.setItem("roles", result);
-//                props.history.push("/");
-                history.goBack();
-            }).catch(err => {
-                localStorage.clear();
-            });
+            AuthService.post("/token",
+                null,
+                {
+                    data: signInData,
+                    headers: configHeaders
+                }).then(data => {
+                    console.log(data);
+                    localStorage.setItem("token", data.data.token);
+                    let result = data.data.userRoles.reduce((prevVal, element) => prevVal + element.role.name + ",", "");
+                    console.log(result);
+                    localStorage.setItem("roles", result);
+                    //if (localStorage.getItem("history") === "/signin"){
+                    //history.push("/");
+                    //}else {
+                    //    history.push(localStorage.getItem("history"));
+                    //}
+                    history.push("/");
+                }).catch(err => {
+                    localStorage.clear();
+                    history.push("/");
+                });
+
+        }
+
             
     };
 
 
     return (
-        <UserContext.Provider value={token}>
           <React.Fragment>
                   <Switch>
                     <Route path="/signin" render={(props) => <SignIn signInHandler={signIn} {...props} />} />
                     <Route path="/" render={(props) => <MainForm {...props} />}/>
                   </Switch>     
         </React.Fragment>  
-        </UserContext.Provider>
     );
 }
 
